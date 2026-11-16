@@ -1,7 +1,16 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import AppHeader from "@/components/AppHeader.vue";
+import AppFooter from "@/components/AppFooter.vue";
+</script>
 
 <template>
-  <h1>Aerytics</h1>
+  <AppHeader />
+
+  <main class="container">
+    <RouterView />
+  </main>
+
+  <AppFooter />
 </template>
 
 <style scoped></style>

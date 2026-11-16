@@ -1,0 +1,56 @@
+:root {
+  /* Color */
+  --blue-400: #4a9eff;
+  --red-400: #ff5f6d;
+  --green-400: #3dd68c;
+  --cyan-400: #36c5f0;
+  --gold-400: #c9a55c;
+
+  --fill-base: #0a0e14;
+  --fill-panel: #10161f;
+  --fill-panel-2: #172030;
+  --fill-hover: #1e2a3c;
+  --line: #233044;
+
+  --text-primary: #edf1f7;
+  --text-secondary: #98a4b7;
+
+  --team-blue: var(--blue-400);
+  --team-red: var(--red-400);
+
+  --state-win: var(--blue-400);
+  --state-loss: var(--red-400);
+
+  --state-positive: var(--green-400);
+  --state-negative: var(--red-400);
+
+  /* Typography */
+  --font-display: "Barlow", "Barlow Fallback", sans-serif;
+  --font-body: "Inter Variable", "Inter Fallback", sans-serif;
+
+  /* Font Weight*/
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Font Size */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-lg: 20px;
+  --text-xl: 32px;
+  --text-2xl: 48px;
+
+  /* Margin */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+}
