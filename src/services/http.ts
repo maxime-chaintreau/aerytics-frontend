@@ -15,13 +15,19 @@ export function isNotFound(error: unknown): boolean {
   return error instanceof HttpError && error.status === 404;
 }
 
-export async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+/** GET a full URL (e.g. Data Dragon) and parse the JSON. */
+export async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   const timeout = AbortSignal.timeout(TIMEOUT_MS);
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(url, {
     headers: { Accept: "application/json" },
     signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
   });
 
   if (!response.ok) throw new HttpError(response.status, `${response.status} ${response.statusText}`);
   return (await response.json()) as T;
+}
+
+/** GET a path on OUR backend (/api/...). */
+export function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  return fetchJson<T>(`${BASE_URL}${path}`, signal);
 }

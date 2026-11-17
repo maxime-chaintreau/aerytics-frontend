@@ -6,6 +6,11 @@ export interface RiotId {
   tagLine: string;
 }
 
+export interface PlayerKey {
+  region: Region;
+  riotId: RiotId;
+}
+
 export const TIERS = ["IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER"] as const;
 export type Tier = (typeof TIERS)[number];
 
