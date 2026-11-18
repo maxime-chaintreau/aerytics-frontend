@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import ProfileView from "@/views/ProfileView.vue";
 
 import { REGIONS } from "@/types/riot";
 
@@ -13,6 +12,12 @@ const router = createRouter({
       name: "profile",
       component: () => import("@/views/ProfileView.vue"),
       meta: { title: "Profil" },
+    },
+    {
+      path: `/:region(${REGIONS.join("|")})/:riotId/matches/:matchId`,
+      name: "match",
+      component: () => import("@/views/MatchView.vue"),
+      meta: { title: "Analyse de partie" },
     },
     {
       path: "/:pathMatch(.*)*",

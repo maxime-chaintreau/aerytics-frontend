@@ -22,5 +22,9 @@ export interface Rank {
   lp: number;
 }
 
-export type Role = "TOP" | "JUNGLE" | "MID" | "BOTTOM" | "SUPPORT";
+export const ROLES = ["TOP", "JUNGLE", "MID", "BOTTOM", "SUPPORT"] as const;
+export type Role = (typeof ROLES)[number];
+
+export type RoleFilter = Role | "ALL" | "MAIN";
+
 export type MatchResult = "WIN" | "LOSS" | "REMAKE";

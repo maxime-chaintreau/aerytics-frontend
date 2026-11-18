@@ -13,6 +13,7 @@
   z-index: 10;
   background: var(--fill-panel);
   border-bottom: 1px solid var(--line);
+  margin-bottom: var(--space-8);
 }
 
 .topbar__inner {

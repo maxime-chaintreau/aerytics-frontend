@@ -8,7 +8,7 @@ export interface ProfileSummary {
   riotId: RiotId;
   profileIconId: number;
   mainRole: Role;
-  mainChampionId: number;
+  mainChampionId: number | null;
   rankedGames: number;
   rank: Rank | null; // null = unranked
   streak: { result: "WIN" | "LOSS"; count: number } | null;
@@ -17,16 +17,24 @@ export interface ProfileSummary {
     kda: number;
     csPerMin: number;
     visionPerMin: number;
-  };
-  lpHistory: LpHistoryPoint[];
+  } | null;
   benchmark: Benchmark;
 }
 
 // ---------- LP history (chart) ----------
 
+export type LpInterval = "day" | "week" | "month";
+
 export interface LpHistoryPoint {
-  date: string; // ISO date, one point per day
-  rank: Rank;
+  start: string; // ISO date of the first day of the period
+  end: string;
+  rank: Rank; // highest rank reached in the period
+  lpChange: number; // LP won or lost over the period
+}
+
+export interface LpHistory {
+  interval: LpInterval;
+  points: LpHistoryPoint[];
 }
 
 // ---------- You vs the average ----------
@@ -43,6 +51,7 @@ export interface Benchmark {
 
 export interface ChampionPoolEntry {
   championId: number;
+  role: Role;
   games: number;
   winrate: number; // 0 to 1
   kda: number;
@@ -53,6 +62,7 @@ export interface ChampionPoolEntry {
 
 export interface MatchSummary {
   matchId: string;
+  role: Role;
   result: MatchResult;
   lpChange: number | null; // null outside ranked
   championId: number;

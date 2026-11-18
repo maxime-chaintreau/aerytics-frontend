@@ -1,30 +1,54 @@
 <script setup lang="ts">
-// Profile page, the player comes from the URL
 import { computed, reactive } from "vue";
+import type { Role } from "@/types/riot";
 import { usePlayerFromRoute } from "@/composables/usePlayerFromRoute";
-import { useChampionPool, usePlayerMatches, useProfileSummary } from "@/composables/useProfileQueries";
+import { useRoleFilter } from "@/composables/useRoleFilter";
+import { useProfileSummary } from "@/composables/useProfileQueries";
+import { useProfileRefresh } from "@/composables/useProfileRefresh";
 import { isNotFound } from "@/services/http";
-import { formatRiotId } from "@/utils/riotId";
-import { formatDecimal, formatDuration, formatPercent, formatRelativeTime, formatSigned } from "@/utils/format";
+import { formatRole } from "@/utils/labels";
+import SegmentedControl from "@/components/ui/SegmentedControl.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
+import RoleIcon from "@/components/game/RoleIcon.vue";
+import ProfileHeader from "@/features/profile/components/ProfileHeader.vue";
+import LpHistoryChart from "@/features/profile/components/LpHistoryChart.vue";
+import ChampionPoolTable from "@/features/profile/components/ChampionPoolTable.vue";
+import BenchmarkCard from "@/features/profile/components/BenchmarkCard.vue";
+import MatchList from "@/features/profile/components/MatchList.vue";
+import MetaCard from "@/features/profile/components/MetaCard.vue";
 
 const player = usePlayerFromRoute();
+const role = useRoleFilter();
 
-const summary = reactive(useProfileSummary(player));
-const championPool = reactive(useChampionPool(player));
-const matches = reactive(usePlayerMatches(player));
-
-// the Riot ID as the server writes it ("Kaori#EUW"), the URL version until it arrives ("kaori#euw")
-const displayName = computed(() => (player.value ? formatRiotId(summary.data?.riotId ?? player.value.riotId) : ""));
+const summary = reactive(useProfileSummary(player, role));
 
 const notFound = computed(() => player.value === null || isNotFound(summary.error));
 
-const isRefreshing = computed(() => summary.isLoading || championPool.isLoading || matches.isLoading);
+// ---------- Role selector ----------
 
-function refreshAll() {
-  summary.refresh();
-  championPool.refresh();
-  matches.refresh();
-}
+const ROLE_OPTIONS: { value: Role | "ALL"; label: string }[] = [
+  { value: "ALL", label: "Tous" },
+  { value: "TOP", label: "Top" },
+  { value: "JUNGLE", label: "Jungle" },
+  { value: "MID", label: "Mid" },
+  { value: "BOTTOM", label: "ADC" },
+  { value: "SUPPORT", label: "Support" },
+];
+
+const selectedRole = computed<Role | "ALL">({
+  get: () => (role.value === "MAIN" ? (summary.data?.mainRole ?? "MID") : role.value),
+  set: (value) => {
+    role.value = value === summary.data?.mainRole ? "MAIN" : value;
+  },
+});
+
+// ---------- No games ----------
+
+const noGames = computed(() => summary.data !== undefined && summary.data.stats === null);
+
+// ---------- Actualiser ----------
+
+const { refreshAll, isRefreshing, hasError } = useProfileRefresh(player);
 </script>
 
 <template>
@@ -34,71 +58,138 @@ function refreshAll() {
     <p><RouterLink to="/">&lt;- Retour à l'accueil</RouterLink></p>
   </template>
 
-  <template v-else-if="player">
-    <h1 tabindex="-1">{{ displayName }}</h1>
+  <div v-else-if="player" class="profile">
+    <ProfileHeader :player="player" :role="role" />
 
-    <button type="button" :disabled="isRefreshing" @click="refreshAll">Actualiser</button>
-
-    <!-- ===== Summary ===== -->
-    <section aria-labelledby="summary-title">
-      <h2 id="summary-title">Résumé</h2>
-
-      <p v-if="summary.isPending && summary.isLoading" role="status">Chargement du profil…</p>
-
-      <div v-else-if="!summary.data" role="alert">
-        <p>Impossible de charger le profil.</p>
-        <button type="button" :disabled="summary.isLoading" @click="summary.refresh()">Réessayer</button>
+    <div class="profile__toolbar">
+      <div class="profile__toolbar-inner">
+        <SegmentedControl v-model="selectedRole" label="Rôle" :options="ROLE_OPTIONS" size="lg">
+          <template #option="{ option }">
+            <RoleIcon :role="option.value" :size="20" decorative />
+            <span class="profile__role-label">{{ option.label }}</span>
+          </template>
+        </SegmentedControl>
+        <button type="button" class="button" :class="{ 'button--primary': hasError }" :disabled="isRefreshing" @click="refreshAll">Actualiser</button>
       </div>
+    </div>
 
-      <template v-else>
-        <p v-if="summary.isLoading" role="status">Mise à jour…</p>
-        <p>
-          <template v-if="summary.data.rank"> {{ summary.data.rank.tier }} {{ summary.data.rank.division }} · {{ summary.data.rank.lp }} LP </template>
-          <template v-else>Non classé</template>
-          · {{ summary.data.rankedGames }} parties classées
-        </p>
-        <ul>
-          <li>Winrate {{ formatPercent(summary.data.stats.winrate) }}</li>
-          <li>KDA {{ formatDecimal(summary.data.stats.kda) }}</li>
-          <li>CS/min {{ formatDecimal(summary.data.stats.csPerMin) }}</li>
-          <li>Vision/min {{ formatDecimal(summary.data.stats.visionPerMin) }}</li>
-        </ul>
+    <div class="profile__grid" :class="{ 'profile__grid--chart-only': noGames }">
+      <LpHistoryChart :player="player" />
+      <template v-if="!noGames">
+        <ChampionPoolTable :player="player" :role="role" />
+        <BenchmarkCard :player="player" :role="role" />
       </template>
-    </section>
+    </div>
 
-    <!-- ===== Champion pool ===== -->
-    <section aria-labelledby="pool-title">
-      <h2 id="pool-title">Pool de champions</h2>
-
-      <p v-if="championPool.isPending && championPool.isLoading" role="status">Chargement…</p>
-      <div v-else-if="!championPool.data" role="alert">
-        <p>Impossible de charger les champions.</p>
-        <button type="button" @click="championPool.refresh()">Réessayer</button>
-      </div>
-      <ul v-else>
-        <li v-for="champion in championPool.data" :key="champion.championId">
-          Champion #{{ champion.championId }} · {{ champion.games }} parties · {{ formatPercent(champion.winrate) }} · {{ formatDecimal(champion.kda) }} KDA
-        </li>
-      </ul>
-    </section>
-
-    <!-- ===== Recent matches ===== -->
-    <section aria-labelledby="matches-title">
-      <h2 id="matches-title">Dernières parties</h2>
-
-      <p v-if="matches.isPending && matches.isLoading" role="status">Chargement…</p>
-      <div v-else-if="!matches.data" role="alert">
-        <p>Impossible de charger les parties.</p>
-        <button type="button" @click="matches.refresh()">Réessayer</button>
-      </div>
-      <p v-else-if="matches.data.matches.length === 0">Aucune partie récente.</p>
-      <ul v-else>
-        <li v-for="match in matches.data.matches" :key="match.matchId">
-          {{ match.result === "WIN" ? "Victoire" : match.result === "LOSS" ? "Défaite" : "Remake" }}
-          <template v-if="match.lpChange !== null">({{ formatSigned(match.lpChange) }} LP)</template>
-          · {{ match.kills }}/{{ match.deaths }}/{{ match.assists }} · {{ match.cs }} CS · {{ formatDuration(match.durationSeconds) }} · {{ formatRelativeTime(match.playedAt) }}
-        </li>
-      </ul>
-    </section>
-  </template>
+    <div class="profile__bottom">
+      <EmptyState v-if="noGames" :title="selectedRole === 'ALL' ? 'Aucune partie classée cette saison' : `Aucune partie classée en ${formatRole(selectedRole)} cette saison`">
+        <template v-if="selectedRole !== 'ALL'" #icon>
+          <RoleIcon :role="selectedRole" :size="64" decorative />
+        </template>
+        Les statistiques apparaîtront dès la première partie classée{{ selectedRole === "ALL" ? "" : " sur ce rôle" }}.
+        <template v-if="selectedRole !== 'ALL'" #actions>
+          <button type="button" class="button button--primary" @click="selectedRole = 'ALL'">Voir tous les rôles</button>
+        </template>
+      </EmptyState>
+      <MatchList v-else :player="player" :role="role" />
+      <MetaCard :player="player" :role="role" />
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.profile {
+  container: profile / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-block: var(--space-6);
+}
+
+.profile__toolbar {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 5;
+  container-type: scroll-state;
+  margin-block: calc(-1 * var(--space-2));
+  padding-block: var(--space-2);
+  background: var(--fill-base);
+}
+
+.profile__toolbar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+@container scroll-state(stuck: top) {
+  .profile__toolbar-inner {
+    box-shadow:
+      0 var(--space-2) 0 0 var(--fill-base),
+      0 calc(var(--space-2) + 1px) 0 0 var(--line);
+  }
+}
+
+.profile__toolbar-inner > .button {
+  margin-left: auto;
+}
+
+@container profile (max-width: 560px) {
+  .profile__role-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.profile__grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@container profile (min-width: 680px) {
+  .profile__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile__grid > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@container profile (min-width: 1100px) {
+  .profile__grid {
+    grid-template-columns: minmax(0, 1.3fr) repeat(2, minmax(0, 1fr));
+  }
+
+  .profile__grid > :first-child {
+    grid-column: auto;
+  }
+
+  .profile__grid--chart-only > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.profile__bottom {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@container profile (min-width: 1000px) {
+  .profile__bottom {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+</style>
+
+<style>
+html:has(.profile__toolbar) {
+  scroll-padding-top: calc(var(--header-height) + 58px + var(--space-4));
+}
+</style>

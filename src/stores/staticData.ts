@@ -37,6 +37,14 @@ export const useStaticDataStore = defineStore("staticData", () => {
     return pending;
   }
 
+  function retryAfterError() {
+    if (status.value === "error") load();
+  }
+  window.addEventListener("online", retryAfterError);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") retryAfterError();
+  });
+
   /** undefined while loading, or for a champion too new for the current list */
   const champion = (key: number): ChampionInfo | undefined => champions.value[key];
   const item = (id: number): ItemInfo | undefined => items.value[id];
@@ -44,6 +52,7 @@ export const useStaticDataStore = defineStore("staticData", () => {
   const championIconUrl = (champion: ChampionInfo) => (version.value ? ddragonImage.champion(version.value, champion.image) : undefined);
   const itemIconUrl = (item: ItemInfo) => (version.value ? ddragonImage.item(version.value, item.image) : undefined);
   const profileIconUrl = (iconId: number) => (version.value ? ddragonImage.profileIcon(version.value, iconId) : undefined);
+  const championSplashUrl = (champion: ChampionInfo) => ddragonImage.splash(champion.id);
 
-  return { version, champions, items, status, load, champion, item, championIconUrl, itemIconUrl, profileIconUrl };
+  return { version, champions, items, status, load, champion, item, championIconUrl, itemIconUrl, profileIconUrl, championSplashUrl };
 });

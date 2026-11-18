@@ -28,4 +28,5 @@ export const ddragonImage = {
   champion: (version: string, image: string) => `${DDRAGON_URL}/cdn/${version}/img/champion/${image}`,
   item: (version: string, image: string) => `${DDRAGON_URL}/cdn/${version}/img/item/${image}`,
   profileIcon: (version: string, iconId: number) => `${DDRAGON_URL}/cdn/${version}/img/profileicon/${iconId}.png`,
+  splash: (championId: string, skin = 0) => `${DDRAGON_URL}/cdn/img/champion/splash/${championId}_${skin}.jpg`,
 };

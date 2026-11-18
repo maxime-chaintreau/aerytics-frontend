@@ -3,6 +3,8 @@ const LOCALE = "fr-FR";
 const percentFormat = new Intl.NumberFormat(LOCALE, { style: "percent", maximumFractionDigits: 0 });
 const decimalFormats = new Map<number, Intl.NumberFormat>();
 const relativeFormat = new Intl.RelativeTimeFormat(LOCALE, { numeric: "auto", style: "short" });
+const shortDateFormat = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short", timeZone: "UTC" });
+const monthFormat = new Intl.DateTimeFormat(LOCALE, { month: "long", year: "numeric", timeZone: "UTC" });
 
 /** 0.54 -> "54 %" */
 export function formatPercent(ratio: number): string {
@@ -49,4 +51,14 @@ export function formatRelativeTime(isoDate: string, now: number = Date.now()): s
     if (Math.abs(seconds) >= size) return relativeFormat.format(Math.round(seconds / size), unit);
   }
   return relativeFormat.format(0, "minute");
+}
+
+/** "2026-11-12" -> "12 nov."*/
+export function formatShortDate(isoDate: string): string {
+  return shortDateFormat.format(new Date(isoDate));
+}
+
+/** "2026-11-01" -> "novembre 2026" */
+export function formatMonth(isoDate: string): string {
+  return monthFormat.format(new Date(isoDate));
 }

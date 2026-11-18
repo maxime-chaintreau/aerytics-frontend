@@ -6,6 +6,18 @@
   --cyan-400: #36c5f0;
   --gold-400: #c9a55c;
 
+  /* Tiers */
+  --tier-iron: #8a8584;
+  --tier-bronze: #b07a5a;
+  --tier-silver: #a8b6c2;
+  --tier-gold: #e0b44f;
+  --tier-platinum: #4fb8b0;
+  --tier-emerald: #2fbf71;
+  --tier-diamond: #6f8cff;
+  --tier-master: #b36cf0;
+  --tier-grandmaster: #e5484d;
+  --tier-challenger: #f2cf7a;
+
   --fill-base: #0a0e14;
   --fill-panel: #10161f;
   --fill-panel-2: #172030;
@@ -59,4 +71,5 @@
 
   /* Layout */
   --header-height: 56px;
+  --content-width: 1400px;
 }
