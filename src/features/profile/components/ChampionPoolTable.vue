@@ -6,8 +6,8 @@ import { useStaticDataStore } from "@/stores/staticData";
 import { sortChampionPool, winrateTone, type ChampionSortKey, type SortDirection } from "@/features/profile/profileLogic";
 import { formatDecimal, formatPercent } from "@/utils/format";
 import Panel from "@/components/ui/Panel.vue";
-import ChampionIcon from "@/components/game/ChampionIcon.vue";
-import RoleIcon from "@/components/game/RoleIcon.vue";
+import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
+import RoleIcon from "@/components/game/icon/RoleIcon.vue";
 
 const props = defineProps<{ player: PlayerKey; role: RoleFilter }>();
 
@@ -35,7 +35,6 @@ const staticData = useStaticDataStore();
 const sortKey = ref<ChampionSortKey>("games");
 const sortDirection = ref<SortDirection>("desc");
 
-/** same column: reverse it. New column: start with the highest values */
 function sortBy(key: ChampionSortKey) {
   if (sortKey.value === key) {
     sortDirection.value = sortDirection.value === "desc" ? "asc" : "desc";
@@ -45,7 +44,6 @@ function sortBy(key: ChampionSortKey) {
   }
 }
 
-/** value of aria-sort: tells screen readers which column is sorted, and how */
 function ariaSort(key: ChampionSortKey) {
   if (sortKey.value !== key) return "none";
   return sortDirection.value === "desc" ? "descending" : "ascending";
@@ -59,7 +57,6 @@ const expanded = ref(false);
 const rows = computed(() => (expanded.value ? sorted.value : sorted.value.slice(0, VISIBLE_ROWS)));
 const hiddenCount = computed(() => sorted.value.length - VISIBLE_ROWS);
 
-// links the "Voir tout" button to the rows it shows (aria-controls)
 const bodyId = useId();
 </script>
 

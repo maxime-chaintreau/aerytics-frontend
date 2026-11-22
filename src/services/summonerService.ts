@@ -1,5 +1,6 @@
 import type { ChampionPoolEntry, LpHistory, LpInterval, MatchPage, ProfileSummary } from "@/types/profile";
 import type { Region, RiotId, RoleFilter } from "@/types/riot";
+import type { MatchDetail } from "@/types/match";
 import { toRiotIdSlug } from "@/utils/riotId";
 import { getJson } from "./http";
 
@@ -17,6 +18,10 @@ export const summonerService = {
 
   getMatches(region: Region, riotId: RiotId, { role, start = 0, count = 10 }: { role: RoleFilter; start?: number; count?: number }, signal?: AbortSignal): Promise<MatchPage> {
     return getJson(`${playerPath(region, riotId)}/matches?role=${role}&start=${start}&count=${count}`, signal);
+  },
+
+  getMatch(region: Region, riotId: RiotId, matchId: string, signal?: AbortSignal): Promise<MatchDetail> {
+    return getJson(`${playerPath(region, riotId)}/matches/${encodeURIComponent(matchId)}`, signal);
   },
 
   getLpHistory(region: Region, riotId: RiotId, interval: LpInterval, signal?: AbortSignal): Promise<LpHistory> {

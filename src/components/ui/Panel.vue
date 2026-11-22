@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// The frame shared by every card: dark panel, small uppercase title, optional text on the right.
 import { useId } from "vue";
 
 defineProps<{
@@ -37,6 +36,7 @@ const titleId = useId();
 
 .panel__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-3);

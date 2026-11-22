@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import type { PlayerKey, Rank } from "@/types/riot";
+import type { PlayerKey } from "@/types/riot";
 import type { LpHistoryPoint, LpInterval } from "@/types/profile";
 import { useLpHistory } from "@/composables/useProfileQueries";
 import { lastPromotion, lpChartHeights, lpDelta } from "@/features/profile/profileLogic";
-import { formatRank, formatTier, tierColor } from "@/utils/labels";
+import { formatRankName, formatRank, formatTier, tierColor } from "@/utils/labels";
 import { formatMonth, formatRelativeTime, formatShortDate, formatSigned } from "@/utils/format";
 import Panel from "@/components/ui/Panel.vue";
 import SegmentedControl from "@/components/ui/SegmentedControl.vue";
@@ -18,7 +18,6 @@ const INTERVALS: { value: LpInterval; label: string }[] = [
   { value: "month", label: "Mois" },
 ];
 
-/** "en 30 jours", "en 12 semaines", "cette saison" */
 const PERIOD_TEXT: Record<LpInterval, (count: number) => string> = {
   day: (count) => `en ${count} jours`,
   week: (count) => `en ${count} semaines`,
@@ -34,13 +33,10 @@ const heights = computed(() => lpChartHeights(points.value));
 const delta = computed(() => lpDelta(points.value));
 const promotion = computed(() => lastPromotion(points.value));
 
-/** "Platine I", without the LP */
-const rankName = (rank: Rank) => (rank.division ? `${formatTier(rank.tier)} ${rank.division}` : formatTier(rank.tier));
-
 const range = computed(() => {
   const first = points.value[0];
   const last = points.value.at(-1);
-  return first && last ? `${rankName(first.rank)} → ${rankName(last.rank)}` : "";
+  return first && last ? `${formatRankName(first.rank)} → ${formatRankName(last.rank)}` : "";
 });
 
 /** what a bar covers: "12 nov.", "3 nov. – 9 nov.", "novembre 2026" */

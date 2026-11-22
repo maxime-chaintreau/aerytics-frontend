@@ -18,6 +18,7 @@ describe("parseRiotIdSlug", () => {
     expect(parseRiotIdSlug("Kaori")).toBeNull();
     expect(parseRiotIdSlug("-EUW")).toBeNull();
     expect(parseRiotIdSlug("Kaori-")).toBeNull();
+    expect(parseRiotIdSlug("Kaori-GG")).toBeNull();
     expect(parseRiotIdSlug("Kaori-TOOLONG")).toBeNull();
   });
 });

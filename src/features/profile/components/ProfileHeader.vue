@@ -49,15 +49,15 @@ const streakLabel = computed(() => {
   return { text: `Série : ${streak.count} ${word}`, tone: streak.result === "WIN" ? "positive" : "negative" } as const;
 });
 
-const iconFailed = ref(false);
-watch(iconUrl, () => (iconFailed.value = false));
+const failedIconUrl = ref<string>();
+const iconFailed = computed(() => iconUrl.value !== undefined && iconUrl.value === failedIconUrl.value);
 </script>
 
 <template>
   <section class="profile-header" :style="splashStyle" aria-labelledby="profile-name">
     <!-- ===== Identity ===== -->
     <div class="profile-header__identity">
-      <img v-if="iconUrl && !iconFailed" class="profile-header__icon" :src="iconUrl" alt="" width="72" height="72" decoding="async" @error="iconFailed = true" />
+      <img v-if="iconUrl && !iconFailed" class="profile-header__icon" :src="iconUrl" alt="" width="72" height="72" decoding="async" @error="failedIconUrl = iconUrl" />
       <span v-else-if="isPending" class="profile-header__icon skeleton" />
       <img v-else class="profile-header__icon" :src="placeholderUrl" alt="" width="72" height="72" />
 

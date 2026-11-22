@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { formatDecimal, formatDuration, formatPercent, formatRelativeTime, formatSigned, formatShortDate, formatMonth } from "@/utils/format";
+import { formatDecimal, formatInteger, formatCompact, formatDuration, formatPercent, formatRelativeTime, formatSigned, formatShortDate, formatMonth, formatDateTime } from "@/utils/format";
 
 // French formatting uses narrow no-break spaces: normalize them to compare.
 const plain = (text: string) => text.replace(/[\u202f\u00a0]/g, " ");
@@ -38,4 +38,17 @@ test("formatShortDate", () => {
 
 test("formatMonth", () => {
   expect(formatMonth("2026-11-01")).toBe("novembre 2026");
+});
+
+test("formatDateTime: date and time, in the user's time zone", () => {
+  // the hour depends on the machine's time zone: only the shape is checked
+  expect(formatDateTime("2026-11-19T13:32:00Z")).toMatch(/^\d{1,2} nov\. 2026,? \d{2}:\d{2}$/);
+});
+
+test("formatInteger: thousands separator, no decimals", () => {
+  expect(formatInteger(27341.6).replace(/\s/g, " ")).toBe("27 342");
+});
+
+test("formatCompact: thousands as k", () => {
+  expect(formatCompact(58340).replace(/\s/g, " ")).toBe("58,3 k");
 });

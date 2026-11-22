@@ -5,10 +5,18 @@ const decimalFormats = new Map<number, Intl.NumberFormat>();
 const relativeFormat = new Intl.RelativeTimeFormat(LOCALE, { numeric: "auto", style: "short" });
 const shortDateFormat = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short", timeZone: "UTC" });
 const monthFormat = new Intl.DateTimeFormat(LOCALE, { month: "long", year: "numeric", timeZone: "UTC" });
+const dateTimeFormat = new Intl.DateTimeFormat(LOCALE, { dateStyle: "medium", timeStyle: "short" });
+const integerFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });
+const compactFormat = new Intl.NumberFormat(LOCALE, { notation: "compact", maximumFractionDigits: 1 });
 
 /** 0.54 -> "54 %" */
 export function formatPercent(ratio: number): string {
   return percentFormat.format(ratio);
+}
+
+/** 27341 -> "27 341" */
+export function formatInteger(value: number): string {
+  return integerFormat.format(value);
 }
 
 /** 3.4 -> "3,4" */
@@ -26,6 +34,11 @@ export function formatSigned(value: number): string {
   if (value > 0) return `+${value}`;
   if (value < 0) return `−${Math.abs(value)}`;
   return "0";
+}
+
+/** 58340 -> "58,3 k" */
+export function formatCompact(value: number): string {
+  return compactFormat.format(value);
 }
 
 /** 1864 -> "31:04" */
@@ -61,4 +74,9 @@ export function formatShortDate(isoDate: string): string {
 /** "2026-11-01" -> "novembre 2026" */
 export function formatMonth(isoDate: string): string {
   return monthFormat.format(new Date(isoDate));
+}
+
+/** "2026-11-19T13:32:00Z" -> "19 nov. 2026, 14:32" */
+export function formatDateTime(isoDate: string): string {
+  return dateTimeFormat.format(new Date(isoDate));
 }

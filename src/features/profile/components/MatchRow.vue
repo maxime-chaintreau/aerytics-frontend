@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { PlayerKey } from "@/types/riot";
+import { formatResult } from "@/utils/labels";
 import type { MatchSummary } from "@/types/profile";
 import { useStaticDataStore } from "@/stores/staticData";
 import { csPerMinute, matchKda } from "@/features/profile/profileLogic";
 import { toRiotIdSlug } from "@/utils/riotId";
 import { formatDecimal, formatDuration, formatRelativeTime, formatSigned } from "@/utils/format";
-import ChampionIcon from "@/components/game/ChampionIcon.vue";
-import ItemIcon from "@/components/game/ItemIcon.vue";
+import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
+import ItemSlots from "@/components/game/ItemSlots.vue";
+import RuneIcon from "@/components/game/icon/RuneIcon.vue";
 
 const props = defineProps<{ match: MatchSummary; player: PlayerKey }>();
 
 const staticData = useStaticDataStore();
-
-const RESULT_LABELS = { WIN: "Victoire", LOSS: "Défaite", REMAKE: "Remake" } as const;
 
 const link = computed(() => ({
   name: "match",
@@ -28,7 +28,7 @@ const opponentName = computed(() => (props.match.opponentChampionId === null ? n
   <RouterLink :to="link" class="match" :class="`match--${match.result.toLowerCase()}`">
     <!-- ===== Result ===== -->
     <div class="match__result">
-      <span class="match__result-label">{{ RESULT_LABELS[match.result] }}</span>
+      <span class="match__result-label">{{ formatResult(match.result) }}</span>
       <span v-if="match.lpChange !== null && match.result !== 'REMAKE'" class="match__muted"> {{ formatSigned(match.lpChange) }} LP </span>
     </div>
 
@@ -55,9 +55,13 @@ const opponentName = computed(() => (props.match.opponentChampionId === null ? n
       <span class="match__muted">{{ formatDecimal(csPerMinute(match)) }} / min</span>
     </div>
 
-    <!-- ===== Items ===== -->
+    <!-- ===== Runes and Items ===== -->
     <div class="match__items">
-      <ItemIcon v-for="(itemId, slot) in match.items" :key="slot" :item-id="itemId" />
+      <span class="match__runes">
+        <RuneIcon :rune-id="match.runes.primary[0]!" decorative />
+        <RuneIcon :rune-id="match.runes.subStyle" decorative class="match__sub-style" />
+      </span>
+      <ItemSlots :items="match.items" :role-quest="match.roleQuest" />
     </div>
 
     <!-- ===== Duration and date ===== -->
@@ -147,11 +151,20 @@ const opponentName = computed(() => (props.match.opponentChampionId === null ? n
 .match__items {
   grid-area: items;
   display: flex;
-  gap: 3px;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-.match__items > :last-child {
-  margin-left: var(--space-1);
+.match__runes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  --rune-size: var(--item-size);
+}
+
+.match__sub-style {
+  --rune-size: calc(var(--item-size) * 0.65);
 }
 
 .match__strong {
@@ -200,11 +213,8 @@ const opponentName = computed(() => (props.match.opponentChampionId === null ? n
   }
 
   .match__items {
-    gap: 2px;
-  }
-
-  .match__items > :last-child {
-    margin-left: 2px;
+    gap: var(--space-1);
+    --item-gap: 2px;
   }
 
   .match__kda .match__strong {

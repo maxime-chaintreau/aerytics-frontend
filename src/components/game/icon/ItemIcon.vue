@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useStaticDataStore } from "@/stores/staticData";
 
 const props = defineProps<{ itemId: number; size?: number }>();
@@ -11,8 +11,8 @@ const staticData = useStaticDataStore();
 const item = computed(() => (props.itemId === 0 ? undefined : staticData.item(props.itemId)));
 const src = computed(() => (item.value ? staticData.itemIconUrl(item.value) : undefined));
 
-const failed = ref(false);
-watch(src, () => (failed.value = false));
+const failedSrc = ref<string>();
+const failed = computed(() => src.value !== undefined && src.value === failedSrc.value);
 </script>
 
 <template>
@@ -27,7 +27,7 @@ watch(src, () => (failed.value = false));
     :height="size ?? 24"
     loading="lazy"
     decoding="async"
-    @error="failed = true"
+    @error="failedSrc = src"
   />
   <span
     v-else

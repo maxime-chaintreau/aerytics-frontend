@@ -1,7 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_URL;
 const TIMEOUT_MS = 8000;
 
-export class HttpError extends Error {
+class HttpError extends Error {
   readonly status: number;
 
   constructor(status: number, message: string) {
@@ -16,7 +16,7 @@ export function isNotFound(error: unknown): boolean {
 }
 
 /** GET a full URL (e.g. Data Dragon) and parse the JSON. */
-export async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   const timeout = AbortSignal.timeout(TIMEOUT_MS);
   const response = await fetch(url, {
     headers: { Accept: "application/json" },
@@ -27,7 +27,7 @@ export async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T
   return (await response.json()) as T;
 }
 
-/** GET a path on OUR backend (/api/...). */
+/** GET a path on the backend (/api/...). */
 export function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   return fetchJson<T>(`${BASE_URL}${path}`, signal);
 }

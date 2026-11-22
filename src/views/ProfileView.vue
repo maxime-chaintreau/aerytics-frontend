@@ -9,7 +9,7 @@ import { isNotFound } from "@/services/http";
 import { formatRole } from "@/utils/labels";
 import SegmentedControl from "@/components/ui/SegmentedControl.vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
-import RoleIcon from "@/components/game/RoleIcon.vue";
+import RoleIcon from "@/components/game/icon/RoleIcon.vue";
 import ProfileHeader from "@/features/profile/components/ProfileHeader.vue";
 import LpHistoryChart from "@/features/profile/components/LpHistoryChart.vue";
 import ChampionPoolTable from "@/features/profile/components/ChampionPoolTable.vue";
@@ -35,9 +35,10 @@ const ROLE_OPTIONS: { value: Role | "ALL"; label: string }[] = [
   { value: "SUPPORT", label: "Support" },
 ];
 
-const selectedRole = computed<Role | "ALL">({
-  get: () => (role.value === "MAIN" ? (summary.data?.mainRole ?? "MID") : role.value),
+const selectedRole = computed<Role | "ALL" | null>({
+  get: () => (role.value === "MAIN" ? (summary.data?.mainRole ?? null) : role.value),
   set: (value) => {
+    if (value === null) return;
     role.value = value === summary.data?.mainRole ? "MAIN" : value;
   },
 });
@@ -82,7 +83,7 @@ const { refreshAll, isRefreshing, hasError } = useProfileRefresh(player);
     </div>
 
     <div class="profile__bottom">
-      <EmptyState v-if="noGames" :title="selectedRole === 'ALL' ? 'Aucune partie classée cette saison' : `Aucune partie classée en ${formatRole(selectedRole)} cette saison`">
+      <EmptyState v-if="noGames && selectedRole"" :title="selectedRole === 'ALL' ? 'Aucune partie classée cette saison' : `Aucune partie classée en ${formatRole(selectedRole)} cette saison`">
         <template v-if="selectedRole !== 'ALL'" #icon>
           <RoleIcon :role="selectedRole" :size="64" decorative />
         </template>

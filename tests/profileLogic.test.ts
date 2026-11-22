@@ -1,18 +1,22 @@
 import { describe, expect, test } from "vitest";
 import type { LpHistoryPoint } from "@/types/profile";
 import type { Rank } from "@/types/riot";
-import { lastPromotion, lpChartHeights, lpDelta, rankScore, sortChampionPool, winrateTone, compareToAverage, BENCHMARK_METRICS, matchKda, csPerMinute } from "@/features/profile/profileLogic";
+import { lastPromotion, lpChartHeights, lpDelta, sortChampionPool, winrateTone, compareToAverage, BENCHMARK_METRICS, matchKda, csPerMinute } from "@/features/profile/profileLogic";
 
 const point = (date: string, rank: Rank, lpChange = 0): LpHistoryPoint => ({ start: date, end: date, rank, lpChange });
 
-describe("rankScore", () => {
-  test("a higher rank always has a higher score", () => {
-    expect(rankScore({ tier: "EMERALD", division: "IV", lp: 0 })).toBeGreaterThan(rankScore({ tier: "PLATINUM", division: "I", lp: 99 }));
-    expect(rankScore({ tier: "EMERALD", division: "II", lp: 0 })).toBeGreaterThan(rankScore({ tier: "EMERALD", division: "III", lp: 99 }));
+describe("rank ordering (via lpChartHeights)", () => {
+  test("a higher rank always gives a higher bar", () => {
+    const [platinum, emerald] = lpChartHeights([{ rank: { tier: "PLATINUM", division: "I", lp: 99 } }, { rank: { tier: "EMERALD", division: "IV", lp: 0 } }]);
+    expect(emerald).toBeGreaterThan(platinum!);
+
+    const [lower, higher] = lpChartHeights([{ rank: { tier: "EMERALD", division: "III", lp: 99 } }, { rank: { tier: "EMERALD", division: "II", lp: 0 } }]);
+    expect(higher).toBeGreaterThan(lower!);
   });
 
   test("Master and above only count LP", () => {
-    expect(rankScore({ tier: "CHALLENGER", division: null, lp: 900 })).toBe(rankScore({ tier: "MASTER", division: null, lp: 900 }));
+    const [master, challenger] = lpChartHeights([{ rank: { tier: "MASTER", division: null, lp: 900 } }, { rank: { tier: "CHALLENGER", division: null, lp: 900 } }]);
+    expect(challenger).toBe(master);
   });
 });
 

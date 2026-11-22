@@ -27,4 +27,9 @@ export type Role = (typeof ROLES)[number];
 
 export type RoleFilter = Role | "ALL" | "MAIN";
 
+export interface RoleQuest {
+  completed: boolean;
+  reward: { type: "item"; itemId: number } | { type: "spell"; spellKey: number };
+}
+
 export type MatchResult = "WIN" | "LOSS" | "REMAKE";

@@ -8,7 +8,7 @@ const DIVISION_INDEX = { IV: 0, III: 1, II: 2, I: 3 } as const;
 const MASTER_INDEX = TIERS.indexOf("MASTER");
 
 /** Turns a rank into one number that only goes up when the player climbs */
-export function rankScore({ tier, division, lp }: Rank): number {
+function rankScore({ tier, division, lp }: Rank): number {
   const tierIndex = TIERS.indexOf(tier);
   if (tierIndex >= MASTER_INDEX || !division) return MASTER_INDEX * LP_PER_TIER + lp;
   return tierIndex * LP_PER_TIER + DIVISION_INDEX[division] * LP_PER_DIVISION + lp;

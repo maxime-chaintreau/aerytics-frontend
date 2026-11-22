@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { formatRank, formatRole, formatTier } from "@/utils/labels";
+import { formatRankName, formatRank, formatRole, formatTier, formatResult, formatQueue } from "@/utils/labels";
 
 test("formatTier", () => {
   expect(formatTier("EMERALD")).toBe("Émeraude");
@@ -13,4 +13,14 @@ test("formatRole uses the community names", () => {
 test("formatRank", () => {
   expect(formatRank({ tier: "EMERALD", division: "II", lp: 48 })).toBe("Émeraude II · 48 LP");
   expect(formatRank({ tier: "MASTER", division: null, lp: 312 })).toBe("Maître · 312 LP");
+});
+
+test("formatResult and formatQueue", () => {
+  expect(formatResult("LOSS")).toBe("Défaite");
+  expect(formatQueue("RANKED_SOLO")).toBe("Classée solo/duo");
+});
+
+test("formatRankName: no LP, no division from Master", () => {
+  expect(formatRankName({ tier: "EMERALD", division: "II" })).toBe("Émeraude II");
+  expect(formatRankName({ tier: "MASTER", division: null })).toBe("Maître");
 });

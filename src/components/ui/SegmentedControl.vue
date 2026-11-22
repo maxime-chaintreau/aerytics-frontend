@@ -16,7 +16,7 @@ defineSlots<{
   option?(props: { option: { value: T; label: string }; checked: boolean }): unknown;
 }>();
 
-const model = defineModel<T>({ required: true });
+const model = defineModel<T | null>({ required: true });
 
 const name = useId();
 </script>
@@ -56,6 +56,10 @@ const name = useId();
   transition:
     background-color 0.15s,
     color 0.15s;
+}
+
+.segmented__option {
+  position: relative;
 }
 
 .segmented__option:hover .segmented__label {

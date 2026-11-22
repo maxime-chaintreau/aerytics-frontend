@@ -26,11 +26,18 @@ const router = createRouter({
       meta: { title: "Page introuvable" },
     },
   ],
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition;
+    if (to.path === from.path) return false;
+    return { top: 0 };
+  },
 });
 
-router.afterEach((to) => {
+router.afterEach((from, to) => {
   document.title = `${to.meta.title ?? "Page"} — Aerytics`;
-  requestAnimationFrame(() => document.querySelector<HTMLElement>("main h1")?.focus());
+  if (from.matched.length === 0) return;
+  if (to.path === from.path) return;
+  requestAnimationFrame(() => document.querySelector<HTMLElement>("main h1")?.focus({ preventScroll: true }));
 });
 
 export default router;

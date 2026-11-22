@@ -1,4 +1,5 @@
-import type { Rank, Role, Tier } from "@/types/riot";
+import type { Queue } from "@/types/match";
+import type { MatchResult, Rank, Role, Tier } from "@/types/riot";
 
 const TIER_LABELS: Record<Tier, string> = {
   IRON: "Fer",
@@ -29,12 +30,36 @@ export function formatRole(role: Role): string {
   return ROLE_LABELS[role];
 }
 
-export function formatRank({ tier, division, lp }: Rank): string {
-  const name = division ? `${formatTier(tier)} ${division}` : formatTier(tier);
-  return `${name} · ${lp} LP`;
+/** { EMERALD, II } -> "Émeraude II" ; Master+ has no division: "Maître" */
+export function formatRankName({ tier, division }: Pick<Rank, "tier" | "division">): string {
+  return division ? `${formatTier(tier)} ${division}` : formatTier(tier);
+}
+
+export function formatRank(rank: Rank): string {
+  return `${formatRankName(rank)} · ${rank.lp} LP`;
 }
 
 /** CSS color of a tier, from the --tier-* tokens in variables.css */
 export function tierColor(tier: Tier): string {
   return `var(--tier-${tier.toLowerCase()})`;
+}
+
+const RESULT_LABELS: Record<MatchResult, string> = {
+  WIN: "Victoire",
+  LOSS: "Défaite",
+  REMAKE: "Remake",
+};
+
+export function formatResult(result: MatchResult): string {
+  return RESULT_LABELS[result];
+}
+
+const QUEUE_LABELS: Record<Queue, string> = {
+  RANKED_SOLO: "Classée solo/duo",
+  RANKED_FLEX: "Classée flexible",
+  NORMAL_DRAFT: "Normale",
+};
+
+export function formatQueue(queue: Queue): string {
+  return QUEUE_LABELS[queue];
 }

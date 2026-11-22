@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useStaticDataStore } from "@/stores/staticData";
 import placeholderUrl from "@/assets/riot/champion-none.png";
 
@@ -22,8 +22,8 @@ const champion = computed(() => staticData.champion(props.championId));
 const src = computed(() => (champion.value ? staticData.championIconUrl(champion.value) : undefined));
 
 // broken image (404, network): show the placeholder instead of a broken icon
-const failed = ref(false);
-watch(src, () => (failed.value = false));
+const failedSrc = ref<string>();
+const failed = computed(() => src.value !== undefined && src.value === failedSrc.value);
 
 const unknown = computed(() => failed.value || (staticData.status === "success" && !champion.value));
 </script>
@@ -40,7 +40,7 @@ const unknown = computed(() => failed.value || (staticData.status === "success" 
     :height="size ?? 32"
     loading="lazy"
     decoding="async"
-    @error="failed = true"
+    @error="failedSrc = src"
   />
   <img v-else-if="unknown" class="champion-icon" :src="placeholderUrl" :alt="decorative ? '' : 'Champion inconnu'" :style="sizeStyle" :width="size ?? 32" :height="size ?? 32" />
   <span

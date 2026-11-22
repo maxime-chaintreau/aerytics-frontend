@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import type { PlayerKey, Role, RoleFilter } from "@/types/riot";
+import { computed, shallowRef, watch } from "vue";
 import type { MetaTier } from "@/types/meta";
-import { useProfileSummary } from "@/composables/useProfileQueries";
+import type { PlayerKey, Role, RoleFilter, Tier } from "@/types/riot";
+import { profileKeys, useProfileSummary } from "@/composables/useProfileQueries";
 import { useRoleMeta } from "@/composables/useMetaQueries";
 import { useStaticDataStore } from "@/stores/staticData";
 import { winrateTone } from "@/features/profile/profileLogic";
@@ -10,7 +10,7 @@ import { formatRole, formatTier } from "@/utils/labels";
 import { formatPercent } from "@/utils/format";
 import Panel from "@/components/ui/Panel.vue";
 import Tag from "@/components/ui/Tag.vue";
-import ChampionIcon from "@/components/game/ChampionIcon.vue";
+import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
 
 const props = defineProps<{ player: PlayerKey; role: RoleFilter }>();
 
@@ -22,12 +22,30 @@ const { data: summary } = useProfileSummary(
 );
 const staticData = useStaticDataStore();
 
-const metaRole = computed<Role | null>(() => {
-  if (!summary.value) return null;
-  return props.role === "ALL" || props.role === "MAIN" ? summary.value.mainRole : props.role;
+const playerId = (player: PlayerKey) => profileKeys.player(player).join("/");
+
+const lastKnown = shallowRef<{ player: string; mainRole: Role; tier: Tier | null } | null>(null);
+watch(
+  summary,
+  (value) => {
+    if (value) lastKnown.value = { player: playerId(props.player), mainRole: value.mainRole, tier: value.rank?.tier ?? null };
+  },
+  { immediate: true },
+);
+
+const facts = computed(() => {
+  if (summary.value) return { mainRole: summary.value.mainRole, tier: summary.value.rank?.tier ?? null };
+  const last = lastKnown.value;
+  return last && last.player === playerId(props.player) ? last : null;
 });
 
-const minTier = computed(() => summary.value?.rank?.tier ?? null);
+
+const metaRole = computed<Role | null>(() => {
+  if (!facts.value) return null;
+  return props.role === "ALL" || props.role === "MAIN" ? facts.value.mainRole : props.role;
+});
+
+const minTier = computed(() => facts.value?.tier ?? null);
 
 const { data: meta, isPending, error } = useRoleMeta(metaRole, minTier);
 

@@ -1,4 +1,5 @@
-import type { MatchResult, Rank, Region, RiotId, Role } from "./riot";
+import type { MatchResult, Rank, Region, RiotId, Role, RoleQuest } from "./riot";
+import type { RunePage } from "./match";
 
 // ---------- Header + headline stats ----------
 
@@ -72,6 +73,9 @@ export interface MatchSummary {
   assists: number;
   cs: number;
   items: number[]; // 6 slots + trinket, 0 = empty slot
+  roleQuest: RoleQuest | null;
+  summonerSpells: [number, number];
+  runes: RunePage;
   durationSeconds: number;
   playedAt: string; // ISO date of the game start
 }

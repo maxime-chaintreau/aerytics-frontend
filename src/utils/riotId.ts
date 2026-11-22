@@ -14,7 +14,7 @@ export function parseRiotIdSlug(slug: string): RiotId | null {
 
   const gameName = slug.slice(0, index).trim();
   const tagLine = slug.slice(index + 1).trim();
-  if (!gameName || !/^[\p{L}\p{N}]{2,5}$/u.test(tagLine)) return null;
+  if (!gameName || !/^[\p{L}\p{N}]{3,5}$/u.test(tagLine)) return null;
 
   return { gameName, tagLine };
 }
