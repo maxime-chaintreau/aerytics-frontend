@@ -6,6 +6,7 @@ const props = withDefaults(
   defineProps<{
     spellKey: number;
     size?: number;
+    upgraded?: boolean;
     decorative?: boolean;
   }>(),
   { decorative: false },
@@ -18,6 +19,8 @@ const sizeStyle = computed(() => (props.size ? { "--spell-size": `${props.size}p
 const spell = computed(() => staticData.summonerSpell(props.spellKey));
 const src = computed(() => (spell.value ? staticData.summonerSpellIconUrl(spell.value) : undefined));
 
+const name = computed(() => (spell.value ? `${spell.value.name}${props.upgraded ? " (améliorée)" : ""}` : undefined));
+
 const failedSrc = ref<string>();
 const failed = computed(() => src.value !== undefined && src.value === failedSrc.value);
 </script>
@@ -27,8 +30,9 @@ const failed = computed(() => src.value !== undefined && src.value === failedSrc
     v-if="src && !failed"
     class="spell-icon"
     :src="src"
-    :alt="decorative ? '' : spell?.name"
-    :title="spell?.name"
+    :class="{ 'spell-icon--upgraded': upgraded }"
+    :alt="decorative ? '' : name"
+    :title="name"
     :style="sizeStyle"
     :width="size ?? 22"
     :height="size ?? 22"
@@ -57,5 +61,9 @@ const failed = computed(() => src.value !== undefined && src.value === failedSrc
 
 .spell-icon--empty {
   background: var(--fill-hover);
+}
+
+.spell-icon--upgraded {
+  box-shadow: 0 0 0 1px var(--accent-gold);
 }
 </style>

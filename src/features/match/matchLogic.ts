@@ -1,5 +1,7 @@
 import type { MatchDetail, MatchParticipant, MatchTeam, TeamSide } from "@/types/match";
 
+const TELEPORT = 12;
+
 /** the player whose page this is */
 export function focusedParticipant(match: MatchDetail): MatchParticipant {
   const participant = match.participants.find(({ puuid }) => puuid === match.focus.puuid);
@@ -16,4 +18,8 @@ export function teamOf(match: MatchDetail, side: TeamSide): { team: MatchTeam; p
   const team = match.teams.find((candidate) => candidate.side === side);
   if (!team) throw new Error(`No ${side} team in match ${match.matchId}`);
   return { team, players: match.participants.filter((participant) => participant.side === side) };
+}
+
+export function upgradedSpell({ role, roleQuest, summonerSpells }: Pick<MatchParticipant, "role" | "roleQuest" | "summonerSpells">): number | null {
+  return role === "TOP" && roleQuest.completed && summonerSpells.includes(TELEPORT) ? TELEPORT : null;
 }

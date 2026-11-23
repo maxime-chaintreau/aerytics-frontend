@@ -67,6 +67,7 @@ export const useStaticDataStore = defineStore("staticData", () => {
   const runeIconUrl = (runeOrStyle: RuneInfo | RuneStyleInfo) => ddragonImage.rune(runeOrStyle.icon);
   const summonerSpellIconUrl = (spell: SummonerSpellInfo) => (version.value ? ddragonImage.summonerSpell(version.value, spell.image) : undefined);
   const profileIconUrl = (iconId: number) => (version.value ? ddragonImage.profileIcon(version.value, iconId) : undefined);
+  const mapUrl = (mapId: number) => (version.value ? ddragonImage.map(version.value, mapId) : undefined);
   const championSplashUrl = (champion: ChampionInfo) => ddragonImage.splash(champion.id);
 
   return {
@@ -88,6 +89,7 @@ export const useStaticDataStore = defineStore("staticData", () => {
     runeIconUrl,
     summonerSpellIconUrl,
     profileIconUrl,
+    mapUrl,
     championSplashUrl,
   };
 });

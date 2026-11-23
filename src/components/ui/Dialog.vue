@@ -4,6 +4,7 @@ import { nextTick, ref, useId, useTemplateRef, watch } from "vue";
 defineProps<{
   title: string;
   subtitle?: string;
+  size?: "md" | "lg";
 }>();
 
 const open = defineModel<boolean>("open", { required: true });
@@ -36,7 +37,7 @@ function onClick(event: MouseEvent) {
 </script>
 
 <template>
-  <dialog ref="dialog" class="dialog" :aria-labelledby="titleId" @close="onClose" @click="onClick">
+  <dialog ref="dialog" class="dialog" :class="{ 'dialog--lg': size === 'lg' }" :aria-labelledby="titleId" @close="onClose" @click="onClick">
     <div v-if="rendered" class="dialog__panel">
       <header class="dialog__header">
         <div>
@@ -85,6 +86,10 @@ function onClick(event: MouseEvent) {
 
 .dialog::backdrop {
   background: rgb(0 0 0 / 0.6);
+}
+
+.dialog--lg {
+  width: min(1080px, calc(100vw - 2 * var(--space-4)));
 }
 
 .dialog__panel {

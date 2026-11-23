@@ -39,4 +39,5 @@ export const ddragonImage = {
   splash: (championId: string, skin = 0) => `${DDRAGON_URL}/cdn/img/champion/splash/${championId}_${skin}.jpg`,
   summonerSpell: (version: string, image: string) => `${DDRAGON_URL}/cdn/${version}/img/spell/${image}`,
   rune: (icon: string) => `${DDRAGON_URL}/cdn/img/${icon}`,
+  map: (version: string, mapId: number) => `${DDRAGON_URL}/cdn/${version}/img/map/map${mapId}.png`,
 };

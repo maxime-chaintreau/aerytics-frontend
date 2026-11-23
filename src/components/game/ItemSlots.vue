@@ -1,30 +1,23 @@
 <script setup lang="ts">
 import type { RoleQuest } from "@/types/riot";
 import ItemIcon from "@/components/game/icon/ItemIcon.vue";
-import SummonerSpellIcon from "@/components/game/icon/SummonerSpellIcon.vue";
 
 defineProps<{
   items: number[];
-  roleQuest?: RoleQuest | null;
-  reserveQuestSlot?: boolean;
+  roleQuest: RoleQuest;
 }>();
 </script>
 
 <template>
   <ul class="item-slots" aria-label="Objets">
-    <li
-      v-if="roleQuest"
-      class="item-slots__quest"
-      :class="{ 'item-slots__quest--pending': !roleQuest.completed }"
-      :title="roleQuest.completed ? 'Quête de rôle terminée' : 'Quête de rôle non terminée'"
-    >
-      <ItemIcon v-if="roleQuest.reward.type === 'item'" :item-id="roleQuest.reward.itemId" />
-      <SummonerSpellIcon v-else :spell-key="roleQuest.reward.spellKey" />
-      <span class="visually-hidden">{{ roleQuest.completed ? "(quête de rôle terminée)" : "(quête de rôle non terminée)" }}</span>
-    </li>
-    <li v-else-if="reserveQuestSlot" class="item-slots__quest item-slots__quest--none" aria-hidden="true" />
     <li v-for="(itemId, slot) in items" :key="slot" class="item-slots__slot">
       <ItemIcon :item-id="itemId" />
+    </li>
+    <li class="item-slots__quest" :class="{ 'item-slots__quest--pending': !roleQuest.completed }" :title="roleQuest.completed ? 'Quête de rôle terminée' : 'Quête de rôle non terminée'">
+      <span class="item-slots__quest-icon">
+        <ItemIcon :item-id="roleQuest.itemId" />
+      </span>
+      <span class="visually-hidden">{{ roleQuest.completed ? "Quête de rôle terminée" : "Quête de rôle non terminée" }}</span>
     </li>
   </ul>
 </template>
@@ -39,29 +32,32 @@ defineProps<{
   list-style: none;
 }
 
+.item-slots__slot:nth-child(7) {
+  margin-left: var(--space-1);
+}
+
 .item-slots__quest {
-  --spell-size: var(--item-size, 24px);
-  margin-right: var(--space-1);
-  border-radius: var(--radius-sm);
+  position: relative;
+  margin-left: var(--space-1);
+}
+
+.item-slots__quest-icon {
+  display: grid;
+  place-items: center;
+  width: var(--item-size, 24px);
+  height: var(--item-size, 24px);
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--fill-base);
   box-shadow: 0 0 0 1px var(--accent-gold);
 }
 
-.item-slots__quest--pending {
+.item-slots__quest--pending .item-slots__quest-icon {
   box-shadow: 0 0 0 1px var(--line);
 }
 
-.item-slots__quest--pending > :first-child {
+.item-slots__quest--pending .item-slots__quest-icon > * {
   filter: grayscale(1);
-  opacity: 0.4;
-}
-
-.item-slots__quest--none {
-  width: var(--item-size, 24px);
-  height: var(--item-size, 24px);
-  box-shadow: none;
-}
-
-.item-slots__slot:last-child {
-  margin-left: var(--space-1);
+  opacity: 0.5;
 }
 </style>

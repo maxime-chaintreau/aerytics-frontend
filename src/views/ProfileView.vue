@@ -70,11 +70,11 @@ const { refreshAll, isRefreshing, hasError } = useProfileRefresh(player);
             <span class="profile__role-label">{{ option.label }}</span>
           </template>
         </SegmentedControl>
-        <button type="button" class="button" :class="{ 'button--primary': hasError }" :disabled="isRefreshing" @click="refreshAll">Actualiser</button>
+        <button type="button" class="button button--lg" :class="{ 'button--primary': hasError }" :disabled="isRefreshing" @click="refreshAll">Actualiser</button>
       </div>
     </div>
 
-    <div class="profile__grid" :class="{ 'profile__grid--chart-only': noGames }">
+    <div class="profile__grid" :class="{ 'profile__grid--chart-only': noGames, 'profile__grid--stale': summary.isPlaceholderData }" :aria-busy="summary.isPlaceholderData">
       <LpHistoryChart :player="player" />
       <template v-if="!noGames">
         <ChampionPoolTable :player="player" :role="role" />
@@ -83,7 +83,7 @@ const { refreshAll, isRefreshing, hasError } = useProfileRefresh(player);
     </div>
 
     <div class="profile__bottom">
-      <EmptyState v-if="noGames && selectedRole"" :title="selectedRole === 'ALL' ? 'Aucune partie classée cette saison' : `Aucune partie classée en ${formatRole(selectedRole)} cette saison`">
+      <EmptyState v-if="noGames && selectedRole" :title="selectedRole === 'ALL' ? 'Aucune partie classée cette saison' : `Aucune partie classée en ${formatRole(selectedRole)} cette saison`">
         <template v-if="selectedRole !== 'ALL'" #icon>
           <RoleIcon :role="selectedRole" :size="64" decorative />
         </template>
@@ -151,6 +151,12 @@ const { refreshAll, isRefreshing, hasError } = useProfileRefresh(player);
 .profile__grid {
   display: grid;
   gap: var(--space-4);
+  transition: opacity 0.15s;
+}
+
+.profile__grid--stale {
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 @container profile (min-width: 680px) {

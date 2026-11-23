@@ -7,14 +7,14 @@ import MatchRow from "@/features/profile/components/MatchRow.vue";
 
 const props = defineProps<{ player: PlayerKey; role: RoleFilter }>();
 
-const { data, isPending, isLoading, error, hasNextPage, loadNextPage } = usePlayerMatches(
+const { data, isPending, isLoading, isPlaceholderData, error, hasNextPage, loadNextPage } = usePlayerMatches(
   () => props.player,
   () => props.role,
 );
 
 const matches = computed(() => data.value?.pages.flatMap((page) => page.matches) ?? []);
 
-const isLoadingMore = computed(() => isLoading.value && matches.value.length > 0);
+const isLoadingMore = computed(() => isLoading.value && !isPlaceholderData.value && matches.value.length > 0);
 </script>
 
 <template>

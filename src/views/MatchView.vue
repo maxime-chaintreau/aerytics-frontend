@@ -1,18 +1,45 @@
 <script setup lang="ts">
-import { computed, reactive } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { usePlayerFromRoute } from "@/composables/usePlayerFromRoute";
-import { useMatchDetail } from "@/composables/useMatchQueries";
+import { useMatchAnalysis, useMatchDetail, useMatchTimeline } from "@/composables/useMatchQueries";
+import { usePageTitle } from "@/composables/usePageTitle";
+import { useStaticDataStore } from "@/stores/staticData";
+import { focusedParticipant } from "@/features/match/matchLogic";
 import { isNotFound } from "@/services/http";
 import { formatRiotId, toRiotIdSlug } from "@/utils/riotId";
 import MatchHeader from "@/features/match/components/MatchHeader.vue";
 import Scoreboard from "@/features/match/components/Scoreboard.vue";
+import TimelineGraph from "@/features/match/components/TimelineGraph.vue";
+import WinProbability from "@/features/match/components/WinProbability.vue";
+import PerformancePanel from "@/features/match/components/PerformancePanel.vue";
+import { formatResult } from "@/utils/labels";
+import BuildOrder from "@/features/match/components/BuildOrder.vue";
+import DamageBreakdown from "@/features/match/components/DamageBreakdown.vue";
+import MatchMap from "@/features/match/components/MatchMap.vue";
 
 const route = useRoute();
 const player = usePlayerFromRoute();
 const matchId = computed(() => (typeof route.params.matchId === "string" ? route.params.matchId : null));
 
 const match = reactive(useMatchDetail(player, matchId));
+useMatchTimeline(() => player.value?.region ?? null, matchId);
+useMatchAnalysis(() => player.value?.region ?? null, matchId);
+
+const staticData = useStaticDataStore();
+usePageTitle(() => {
+  const focused = match.data ? focusedParticipant(match.data) : undefined;
+  if (!match.data || !focused || !player.value) return null;
+  const champion = staticData.champion(focused.championId)?.name;
+  return `${formatResult(match.data.result)}${champion ? ` · ${champion}` : ""} — ${formatRiotId(player.value.riotId)}`;
+});
+
+const pickedPuuid = ref<string | null>(null);
+watch(matchId, () => (pickedPuuid.value = null));
+const selectedPuuid = computed({
+  get: () => pickedPuuid.value ?? match.data?.focus.puuid ?? "",
+  set: (puuid: string) => (pickedPuuid.value = puuid),
+});
 
 const notFound = computed(() => player.value === null || matchId.value === null || isNotFound(match.error));
 
@@ -32,6 +59,12 @@ const profileLink = computed(() => (player.value ? { name: "profile", params: { 
     <template v-else-if="match.data && player">
       <MatchHeader :match="match.data" />
       <Scoreboard :match="match.data" :region="player.region" />
+      <PerformancePanel v-model:selected="selectedPuuid" :match="match.data" :region="player.region" />
+      <BuildOrder v-model:selected="selectedPuuid" :match="match.data" :region="player.region" />
+      <DamageBreakdown :match="match.data" />
+      <TimelineGraph :match="match.data" :region="player.region" />
+      <WinProbability :match="match.data" :region="player.region" />
+      <MatchMap v-model:selected="selectedPuuid" :match="match.data" :region="player.region" />
     </template>
 
     <!-- ===== Failed (network, server) ===== -->

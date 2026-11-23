@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import type { PlayerKey, RoleFilter } from "@/types/riot";
 import { useProfileSummary } from "@/composables/useProfileQueries";
 import { useStaticDataStore } from "@/stores/staticData";

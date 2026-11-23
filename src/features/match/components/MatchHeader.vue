@@ -2,7 +2,7 @@
 import { computed, defineAsyncComponent, ref } from "vue";
 import type { MatchDetail } from "@/types/match";
 import { useStaticDataStore } from "@/stores/staticData";
-import { focusedParticipant, laneOpponent } from "@/features/match/matchLogic";
+import { focusedParticipant, laneOpponent, upgradedSpell } from "@/features/match/matchLogic";
 import { formatQueue, formatResult, formatRole } from "@/utils/labels";
 import { formatDateTime, formatDecimal, formatDuration, formatPercent, formatRelativeTime, formatSigned } from "@/utils/format";
 import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
@@ -52,7 +52,7 @@ const runesOpen = ref(false);
         <span class="match-header__level" :title="`Niveau ${player.championLevel}`">{{ player.championLevel }}</span>
       </div>
       <div class="match-header__pair">
-        <SummonerSpellIcon v-for="key in player.summonerSpells" :key="key" :spell-key="key" />
+        <SummonerSpellIcon v-for="key in player.summonerSpells" :key="key" :spell-key="key" :upgraded="key === upgradedSpell(player)" />
       </div>
       <button type="button" class="match-header__pair match-header__runes" aria-haspopup="dialog" title="Voir la page de runes" @click="runesOpen = true">
         <RuneIcon :rune-id="player.runes.primary[0]!" :size="28" decorative />

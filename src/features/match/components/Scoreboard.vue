@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, shallowRef } from "vue";
+import { computed, defineAsyncComponent, reactive, ref, shallowRef } from "vue";
 import type { MatchDetail, MatchParticipant } from "@/types/match";
 import type { Region } from "@/types/riot";
+import { useMatchAnalysis } from "@/composables/useMatchQueries";
 import { useStaticDataStore } from "@/stores/staticData";
-import { focusedParticipant, teamOf } from "@/features/match/matchLogic";
+import { teamOf } from "@/features/match/matchLogic";
 import { SCOREBOARD_PRESETS, type ScoreboardPresetId } from "@/features/match/matchStats";
 import { formatRole } from "@/utils/labels";
 import Panel from "@/components/ui/Panel.vue";
@@ -15,19 +16,20 @@ const RunePageDetail = defineAsyncComponent(() => import("@/components/game/Rune
 
 const props = defineProps<{ match: MatchDetail; region: Region }>();
 
+const analysis = reactive(
+  useMatchAnalysis(
+    () => props.region,
+    () => props.match.matchId,
+  ),
+);
+
 const staticData = useStaticDataStore();
 
 const presetId = ref<ScoreboardPresetId>("general");
 const presetOptions = SCOREBOARD_PRESETS.map(({ id, label }) => ({ value: id, label }));
 const columns = computed(() => SCOREBOARD_PRESETS.find(({ id }) => id === presetId.value)!.columns);
 
-const focusSide = computed(() => focusedParticipant(props.match).side);
-
-/** the page's player's team first */
-const teams = computed(() => {
-  const sides = focusSide.value === "BLUE" ? (["BLUE", "RED"] as const) : (["RED", "BLUE"] as const);
-  return sides.map((side) => teamOf(props.match, side));
-});
+const teams = computed(() => (["BLUE", "RED"] as const).map((side) => teamOf(props.match, side)));
 
 const minutes = computed(() => props.match.durationSeconds / 60);
 
@@ -66,6 +68,7 @@ const runesSubtitle = computed(() => {
         :region="region"
         :minutes="minutes"
         :remake="match.remake"
+        :performance="analysis.data?.players"
         @open-runes="openRunes"
       />
     </div>

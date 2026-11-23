@@ -71,7 +71,7 @@ const bodyId = useId();
     <div v-else-if="!pool && error" role="alert" class="pool__message">Impossible de charger les champions. Clique sur « Actualiser » pour réessayer.</div>
 
     <!-- ===== Empty ===== -->
-    <p v-else-if="sorted.length === 0" class="pool__message">{{ role === "ALL" ? "Aucune partie récente." : "Aucune partie récente sur ce rôle." }}</p>
+    <p v-else-if="sorted.length === 0" class="pool__message">{{ role === "ALL" ? "Aucune partie classée cette saison." : "Aucune partie classée sur ce rôle cette saison." }}</p>
 
     <template v-else>
       <table class="pool">

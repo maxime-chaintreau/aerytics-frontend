@@ -1,4 +1,4 @@
-import type { MatchParticipant, StatKey } from "@/types/match";
+import type { MatchParticipant, ObjectiveName, StatKey } from "@/types/match";
 import { formatDecimal, formatDuration, formatInteger, formatPercent } from "@/utils/format";
 
 type StatFormat = "integer" | "decimal1" | "decimal2" | "percent" | "duration" | "yesNo";
@@ -298,7 +298,6 @@ export const SCOREBOARD_PRESETS: ScoreboardPreset[] = [
       stat("holdPings", "Attendez"),
       stat("needVisionPings", "Besoin vision"),
       stat("enemyVisionPings", "Vision ennemie"),
-      stat("visionClearedPings", "Vision nettoyée"),
       stat("commandPings", "Commande"),
       stat("basicPings", "Simple"),
     ],
@@ -307,26 +306,52 @@ export const SCOREBOARD_PRESETS: ScoreboardPreset[] = [
 
 // ---------- Values used by the composed cells ----------
 
-/** heals (self + allies) and shields on allies, shown together in the "general" preset */
 export function healAndShield(participant: MatchParticipant): number {
   return participant.stats.totalHeal + participant.stats.shieldingOnTeammates;
 }
 
-/**
- * Bar length of each player for a value, 0..1, relative to the highest of the GAME (both teams),
- * so the two tables can be compared at a glance. All zero -> all bars empty.
- */
 export function barRatios(participants: MatchParticipant[], valueOf: (participant: MatchParticipant) => number) {
   const max = Math.max(0, ...participants.map(valueOf));
   return new Map(participants.map((participant) => [participant.puuid, max > 0 ? valueOf(participant) / max : 0]));
 }
 
-/**
- * The best value of the game for a stat (highest, or lowest for deaths...), to highlight it.
- * null when nobody has any (0 everywhere): nothing to highlight.
- */
 export function bestValue(participants: MatchParticipant[], key: StatKey, lowerIsBetter = false): number | null {
   const values = participants.map(({ stats }) => stats[key]);
   const best = lowerIsBetter ? Math.min(...values) : Math.max(...values);
   return Math.max(...values) === 0 ? null : best;
+}
+
+// ---------- Team objectives ----------
+
+/** in the game's order of importance; `first`: how the "first one" is said */
+export const TEAM_OBJECTIVES: { name: Exclude<ObjectiveName, "champion">; label: string; first: string }[] = [
+  { name: "tower", label: "Tours", first: "première tour" },
+  { name: "inhibitor", label: "Inhibiteurs", first: "premier inhibiteur" },
+  { name: "dragon", label: "Dragons", first: "premier dragon" },
+  { name: "voidGrubs", label: "Larves du Néant", first: "premières larves" },
+  { name: "riftHerald", label: "Héraut", first: "premier héraut" },
+  { name: "baron", label: "Barons", first: "premier baron" },
+];
+
+// ---------- Pings ----------
+
+export type PingType = "allIn" | "assistMe" | "basic" | "command" | "danger" | "enemyMissing" | "enemyVision" | "getBack" | "hold" | "needVision" | "onMyWay" | "push";
+
+export function pingTypeOf(key: StatKey): PingType | null {
+  return key.endsWith("Pings") ? (key.slice(0, -"Pings".length) as PingType) : null;
+}
+
+// ---------- Objectives ----------
+
+const OBJECTIVE_STATS: Partial<Record<StatKey, Exclude<ObjectiveName, "champion">>> = {
+  turretKills: "tower",
+  inhibitorTakedowns: "inhibitor",
+  dragonTakedowns: "dragon",
+  voidGrubTakedowns: "voidGrubs",
+  riftHeraldTakedowns: "riftHerald",
+  baronTakedowns: "baron",
+};
+
+export function objectiveOf(key: StatKey): Exclude<ObjectiveName, "champion"> | null {
+  return OBJECTIVE_STATS[key] ?? null;
 }

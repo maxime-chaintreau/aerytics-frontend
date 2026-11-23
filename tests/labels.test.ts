@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { formatRankName, formatRank, formatRole, formatTier, formatResult, formatQueue } from "@/utils/labels";
+import { formatRankName, formatRank, formatRole, formatTier, tierColor, formatResult, formatQueue } from "@/utils/labels";
 
 test("formatTier", () => {
   expect(formatTier("EMERALD")).toBe("Émeraude");
@@ -13,6 +13,10 @@ test("formatRole uses the community names", () => {
 test("formatRank", () => {
   expect(formatRank({ tier: "EMERALD", division: "II", lp: 48 })).toBe("Émeraude II · 48 LP");
   expect(formatRank({ tier: "MASTER", division: null, lp: 312 })).toBe("Maître · 312 LP");
+});
+
+test("tierColor points to the CSS token", () => {
+  expect(tierColor("GRANDMASTER")).toBe("var(--tier-grandmaster)");
 });
 
 test("formatResult and formatQueue", () => {

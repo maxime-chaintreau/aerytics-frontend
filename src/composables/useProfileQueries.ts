@@ -21,7 +21,7 @@ type PlayerSource = MaybeRefOrGetter<PlayerKey | null>;
 type RoleSource = MaybeRefOrGetter<RoleFilter>;
 
 /** Template for the state storage */
-function usePlayerQuery<T>(player: PlayerSource, keyOf: (player: PlayerKey) => EntryKey, fetcher: (player: PlayerKey, signal: AbortSignal) => Promise<T>) {
+function usePlayerQuery<T>(player: PlayerSource, keyOf: (player: PlayerKey) => EntryKey, fetcher: (player: PlayerKey, signal: AbortSignal) => Promise<T>, { keepPrevious = false } = {}) {
   return useQuery({
     key: () => {
       const value = toValue(player);
@@ -34,6 +34,7 @@ function usePlayerQuery<T>(player: PlayerSource, keyOf: (player: PlayerKey) => E
       return fetcher(value, signal);
     },
     enabled: () => toValue(player) !== null,
+    placeholderData: keepPrevious ? (previous, entry) => (isSamePlayer(player)(entry) ? previous : undefined) : undefined,
   });
 }
 
@@ -42,6 +43,7 @@ export function useProfileSummary(player: PlayerSource, role: RoleSource) {
     player,
     (value) => profileKeys.summary(value, toValue(role)),
     ({ region, riotId }, signal) => summonerService.getProfile(region, riotId, toValue(role), signal),
+    { keepPrevious: true },
   );
 }
 
@@ -50,6 +52,7 @@ export function useChampionPool(player: PlayerSource, role: RoleSource) {
     player,
     (value) => profileKeys.championPool(value, toValue(role)),
     ({ region, riotId }, signal) => summonerService.getChampionPool(region, riotId, toValue(role), signal),
+    { keepPrevious: true },
   );
 }
 
@@ -69,6 +72,7 @@ export function usePlayerMatches(player: PlayerSource, role: RoleSource) {
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextStart,
     enabled: () => toValue(player) !== null,
+    placeholderData: (previous, entry) => (isSamePlayer(player)(entry) ? previous : undefined),
   });
 }
 
@@ -78,4 +82,12 @@ export function useLpHistory(player: PlayerSource, interval: MaybeRefOrGetter<Lp
     (value) => profileKeys.lpHistory(value, toValue(interval)),
     ({ region, riotId }, signal) => summonerService.getLpHistory(region, riotId, toValue(interval), signal),
   );
+}
+
+function isSamePlayer(player: PlayerSource) {
+  return (entry: { key: EntryKey } | undefined): boolean => {
+    const current = toValue(player);
+    if (!current || !entry) return false;
+    return profileKeys.player(current).every((part, index) => entry.key[index] === part);
+  };
 }

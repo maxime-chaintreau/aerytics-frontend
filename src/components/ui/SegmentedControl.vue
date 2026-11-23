@@ -77,7 +77,7 @@ input:checked + .segmented__label {
 }
 
 .segmented--lg .segmented__label {
-  min-height: 34px;
+  min-height: 32px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);

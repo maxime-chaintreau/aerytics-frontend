@@ -73,7 +73,7 @@ export interface MatchSummary {
   assists: number;
   cs: number;
   items: number[]; // 6 slots + trinket, 0 = empty slot
-  roleQuest: RoleQuest | null;
+  roleQuest: RoleQuest;
   summonerSpells: [number, number];
   runes: RunePage;
   durationSeconds: number;

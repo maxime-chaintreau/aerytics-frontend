@@ -150,7 +150,7 @@ export interface MatchParticipant {
   summonerSpells: [number, number];
   runes: RunePage;
   items: number[];
-  roleQuest: RoleQuest | null;
+  roleQuest: RoleQuest;
   rank: Rank | null;
   mastery: { level: number; points: number } | null;
   stats: ParticipantStats;
@@ -161,7 +161,7 @@ export interface ObjectiveStat {
   kills: number;
 }
 
-export type ObjectiveName = "champion" | "tower" | "inhibitor" | "dragon" | "voidGrubs" | "riftHerald" | "baron" | "atakhan";
+export type ObjectiveName = "champion" | "tower" | "inhibitor" | "dragon" | "voidGrubs" | "riftHerald" | "baron";
 
 export interface MatchTeam {
   side: TeamSide;
