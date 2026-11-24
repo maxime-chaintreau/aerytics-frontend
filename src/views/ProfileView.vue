@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive } from "vue";
+import { computed, reactive, watch } from "vue";
 import type { Role } from "@/types/riot";
 import { usePlayerFromRoute } from "@/composables/usePlayerFromRoute";
 import { useRoleFilter } from "@/composables/useRoleFilter";
 import { useProfileSummary } from "@/composables/useProfileQueries";
 import { useProfileRefresh } from "@/composables/useProfileRefresh";
+import { useRecentSearches } from "@/composables/useRecentSearches";
 import { isNotFound } from "@/services/http";
 import { formatRole } from "@/utils/labels";
 import SegmentedControl from "@/components/ui/SegmentedControl.vue";
@@ -23,6 +24,14 @@ const role = useRoleFilter();
 const summary = reactive(useProfileSummary(player, role));
 
 const notFound = computed(() => player.value === null || isNotFound(summary.error));
+
+const { add: addRecentSearch } = useRecentSearches();
+watch(
+  () => summary.data,
+  (data) => {
+    if (data) addRecentSearch({ region: data.region, riotId: data.riotId, profileIconId: data.profileIconId, summonerLevel: data.summonerLevel, rank: data.rank });
+  },
+);
 
 // ---------- Role selector ----------
 

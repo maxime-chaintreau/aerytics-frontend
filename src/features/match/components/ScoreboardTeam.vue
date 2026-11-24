@@ -434,10 +434,21 @@ const profileLink = ({ riotId }: MatchParticipant) => ({
 }
 
 .team__table thead th {
+  height: calc(3 * 1.2em + 2 * var(--space-2));
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
   color: var(--text-secondary);
   line-height: 1.2;
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+
+.team__table thead th abbr {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
 }
 
 .team__table abbr {

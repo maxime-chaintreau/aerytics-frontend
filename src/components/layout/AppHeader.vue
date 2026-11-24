@@ -1,7 +1,15 @@
+<script setup lang="ts">
+import { useRoute } from "vue-router";
+import PlayerSearch from "@/features/home/components/PlayerSearch.vue";
+
+const route = useRoute();
+</script>
+
 <template>
   <header class="topbar">
     <div class="container topbar__inner">
       <RouterLink to="/" class="brand">Aerytics</RouterLink>
+      <PlayerSearch v-if="route.name !== 'home'" compact class="topbar__search" />
     </div>
   </header>
 </template>
@@ -19,11 +27,23 @@
   height: var(--header-height);
   display: flex;
   align-items: center;
+  gap: var(--space-4);
 }
 
 .brand {
+  flex-shrink: 0;
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: var(--weight-bold);
+}
+
+.topbar__search {
+  margin-left: auto;
+}
+
+@media (max-width: 520px) {
+  .topbar__search {
+    display: none;
+  }
 }
 </style>

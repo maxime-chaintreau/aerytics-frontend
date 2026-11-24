@@ -8,6 +8,7 @@ export interface ProfileSummary {
   region: Region;
   riotId: RiotId;
   profileIconId: number;
+  summonerLevel: number;
   mainRole: Role;
   mainChampionId: number | null;
   rankedGames: number;

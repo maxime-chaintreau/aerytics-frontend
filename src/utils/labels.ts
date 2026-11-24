@@ -1,5 +1,5 @@
 import type { Queue } from "@/types/match";
-import type { MatchResult, Rank, Role, Tier } from "@/types/riot";
+import type { MatchResult, Rank, Role, Tier, Region } from "@/types/riot";
 
 const TIER_LABELS: Record<Tier, string> = {
   IRON: "Fer",
@@ -62,4 +62,9 @@ const QUEUE_LABELS: Record<Queue, string> = {
 
 export function formatQueue(queue: Queue): string {
   return QUEUE_LABELS[queue];
+}
+
+/** "euw" -> "EUW": regions are written in capitals everywhere in the game */
+export function formatRegion(region: Region): string {
+  return region.toUpperCase();
 }

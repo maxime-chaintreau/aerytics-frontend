@@ -28,3 +28,16 @@ export function toRiotIdSlug({ gameName, tagLine }: RiotId): string {
 export function formatRiotId({ gameName, tagLine }: RiotId): string {
   return `${gameName}#${tagLine}`;
 }
+
+/**
+ * What a player types: "Kaori#EUW" -> { gameName: 'Kaori', tagLine: 'EUW' }.
+ * Splits on the LAST "#" (same rule as the slug); the tag needs 3 to 5 letters or digits, like Riot's.
+ */
+export function parseRiotIdInput(input: string): RiotId | null {
+  const index = input.lastIndexOf("#");
+  if (index <= 0) return null;
+  const gameName = input.slice(0, index).trim();
+  const tagLine = input.slice(index + 1).trim();
+  if (!gameName || !/^[\p{L}\p{N}]{3,5}$/u.test(tagLine)) return null;
+  return { gameName, tagLine };
+}

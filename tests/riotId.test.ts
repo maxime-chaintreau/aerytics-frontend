@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { formatRiotId, isRegion, parseRiotIdSlug, toRiotIdSlug } from "@/utils/riotId";
+import { formatRiotId, isRegion, parseRiotIdSlug, toRiotIdSlug, parseRiotIdInput } from "@/utils/riotId";
 
 describe("parseRiotIdSlug", () => {
   test("splits game name and tag line", () => {
@@ -37,4 +37,22 @@ test("isRegion only accepts known regions", () => {
   expect(isRegion("EUW")).toBe(false);
   expect(isRegion("xyz")).toBe(false);
   expect(isRegion(undefined)).toBe(false);
+});
+
+describe("parseRiotIdInput", () => {
+  test("what a player types in the search", () => {
+    expect(parseRiotIdInput("Kaori#EUW")).toEqual({ gameName: "Kaori", tagLine: "EUW" });
+    expect(parseRiotIdInput("  Velkoz Enjoyer # BZH ")).toEqual({ gameName: "Velkoz Enjoyer", tagLine: "BZH" });
+  });
+
+  test("splits on the last #", () => {
+    expect(parseRiotIdInput("We#are#1234")).toEqual({ gameName: "We#are", tagLine: "1234" });
+  });
+
+  test("no #, no name or a wrong tag: null", () => {
+    expect(parseRiotIdInput("Kaori")).toBeNull();
+    expect(parseRiotIdInput("#EUW")).toBeNull();
+    expect(parseRiotIdInput("Kaori#E")).toBeNull();
+    expect(parseRiotIdInput("Kaori#TOOLONG")).toBeNull();
+  });
 });
