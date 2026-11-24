@@ -27,6 +27,12 @@ const router = createRouter({
       meta: { title: (to) => `Partie de ${riotIdOf(to)}` },
     },
     {
+      path: "/champions/:champion",
+      name: "champion",
+      component: () => import("@/views/ChampionView.vue"),
+      meta: { title: "Champion" },
+    },
+    {
       path: "/:pathMatch(.*)*",
       name: "not-found",
       component: () => import("@/views/NotFoundView.vue"),

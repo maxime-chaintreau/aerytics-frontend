@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import type { PingType } from "@/features/match/matchStats";
+import type { PingType } from "@/types/match";
 
 const props = defineProps<{ ping: PingType; fallback: string; size?: number }>();
 

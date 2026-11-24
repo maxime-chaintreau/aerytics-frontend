@@ -3,11 +3,13 @@ import { computed, ref, useId } from "vue";
 import type { PlayerKey, RoleFilter } from "@/types/riot";
 import { useChampionPool } from "@/composables/useProfileQueries";
 import { useStaticDataStore } from "@/stores/staticData";
-import { sortChampionPool, winrateTone, type ChampionSortKey, type SortDirection } from "@/features/profile/profileLogic";
+import { sortChampionPool, type ChampionSortKey, type SortDirection } from "@/features/profile/profileLogic";
+import { winrateTone } from "@/utils/tones";
 import { formatDecimal, formatPercent } from "@/utils/format";
 import Panel from "@/components/ui/Panel.vue";
 import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
 import RoleIcon from "@/components/game/icon/RoleIcon.vue";
+import ChampionLink from "@/components/game/ChampionLink.vue";
 
 const props = defineProps<{ player: PlayerKey; role: RoleFilter }>();
 
@@ -96,12 +98,14 @@ const bodyId = useId();
             <th scope="row" class="pool__champion">
               <span class="pool__champion-cell">
                 <RoleIcon v-if="role === 'ALL'" :role="entry.role" class="pool__role" />
-                <ChampionIcon :champion-id="entry.championId" :size="28" decorative />
-                {{ staticData.champion(entry.championId)?.name ?? "…" }}
+                <ChampionLink :champion-id="entry.championId" :role="entry.role">
+                  <ChampionIcon :champion-id="entry.championId" :size="28" decorative />
+                  {{ staticData.champion(entry.championId)?.name ?? "…" }}
+                </ChampionLink>
               </span>
             </th>
             <td>{{ entry.games }}</td>
-            <td :class="`pool__winrate--${winrateTone(entry.winrate)}`">{{ formatPercent(entry.winrate) }}</td>
+            <td :class="`tone-${winrateTone(entry.winrate)}`">{{ formatPercent(entry.winrate) }}</td>
             <td>{{ formatDecimal(entry.kda) }}</td>
             <td>{{ formatDecimal(entry.csPerMin) }}</td>
           </tr>
@@ -183,14 +187,6 @@ const bodyId = useId();
   display: inline-block;
   width: 1ch;
   font-size: 8px;
-}
-
-.pool__winrate--positive {
-  color: var(--state-positive);
-}
-
-.pool__winrate--negative {
-  color: var(--state-negative);
 }
 
 .pool .pool__footer {

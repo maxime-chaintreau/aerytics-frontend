@@ -1,37 +1,25 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
-import type { MetaTier } from "@/types/meta";
-import type { Role, Tier } from "@/types/riot";
 import { useRoleMeta } from "@/composables/useMetaQueries";
 import { useStaticDataStore } from "@/stores/staticData";
-import { winrateTone } from "@/features/profile/profileLogic";
+import type { StatsTier } from "@/types/champion";
+import type { Role } from "@/types/riot";
 import { formatPercent } from "@/utils/format";
+import { ROLE_OPTIONS } from "@/utils/labels";
+import { DEFAULT_STATS_TIER } from "@/utils/statsTier";
+import { metaTierTone, statWinrateTone } from "@/utils/tones";
 import Panel from "@/components/ui/Panel.vue";
 import SegmentedControl from "@/components/ui/SegmentedControl.vue";
 import Tag from "@/components/ui/Tag.vue";
 import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
 import RoleIcon from "@/components/game/icon/RoleIcon.vue";
+import ChampionLink from "@/components/game/ChampionLink.vue";
+import StatsTierSelect from "@/components/game/StatsTierSelect.vue";
 
-const ROLE_OPTIONS: { value: Role; label: string }[] = [
-  { value: "TOP", label: "Top" },
-  { value: "JUNGLE", label: "Jungle" },
-  { value: "MID", label: "Mid" },
-  { value: "BOTTOM", label: "ADC" },
-  { value: "SUPPORT", label: "Support" },
-];
 const role = ref<Role>("MID");
+const tier = ref<StatsTier | null>(DEFAULT_STATS_TIER);
 
-const TIER_OPTIONS: { value: Tier | ""; label: string }[] = [
-  { value: "", label: "Tous rangs" },
-  { value: "EMERALD", label: "Émeraude +" },
-  { value: "DIAMOND", label: "Diamant +" },
-  { value: "MASTER", label: "Maître +" },
-];
-
-const tierChoice = ref<Tier | "">("EMERALD");
-const minTier = computed(() => tierChoice.value || null);
-
-const meta = reactive(useRoleMeta(role, minTier));
+const meta = reactive(useRoleMeta(role, tier));
 const staticData = useStaticDataStore();
 
 const COLLAPSED = 10;
@@ -41,17 +29,13 @@ const champions = computed(() => {
   return expanded.value ? all : all.slice(0, COLLAPSED);
 });
 
-const tierTone = (tier: MetaTier) => (tier === "S+" ? "gold" : tier === "S" ? "positive" : "neutral");
 const title = computed(() => (meta.data ? `Tier list · Patch ${meta.data.patch}` : "Tier list"));
 </script>
 
 <template>
   <Panel :title="title">
     <template #aside>
-      <label class="visually-hidden" for="tier-list-rank">Rangs pris en compte</label>
-      <select id="tier-list-rank" v-model="tierChoice" class="tier-list__rank">
-        <option v-for="option in TIER_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
-      </select>
+      <StatsTierSelect v-model="tier" />
     </template>
 
     <SegmentedControl v-model="role" label="Rôle" :options="ROLE_OPTIONS" class="tier-list__roles">
@@ -86,14 +70,16 @@ const title = computed(() => (meta.data ? `Tier list · Patch ${meta.data.patch}
             <td class="tier-list__place">{{ index + 1 }}</td>
             <th scope="row" class="tier-list__left">
               <span class="tier-list__champion">
-                <ChampionIcon :champion-id="entry.championId" :size="28" decorative />
-                {{ staticData.champion(entry.championId)?.name ?? "…" }}
+                <ChampionLink :champion-id="entry.championId" :role="role" :tier="tier">
+                  <ChampionIcon :champion-id="entry.championId" :size="28" decorative />
+                  {{ staticData.champion(entry.championId)?.name ?? "…" }}
+                </ChampionLink>
               </span>
             </th>
             <td>
-              <Tag :tone="tierTone(entry.tier)" class="tier-list__tier">{{ entry.tier }}</Tag>
+              <Tag :tone="metaTierTone(entry.tier)" class="tier-list__tier">{{ entry.tier }}</Tag>
             </td>
-            <td :class="`tier-list__winrate--${winrateTone(entry.winrate)}`">{{ formatPercent(entry.winrate) }}</td>
+            <td :class="`tone-${statWinrateTone(entry.winrate)}`">{{ formatPercent(entry.winrate) }}</td>
             <td>{{ formatPercent(entry.pickRate) }}</td>
           </tr>
         </tbody>
@@ -110,16 +96,6 @@ const title = computed(() => (meta.data ? `Tier list · Patch ${meta.data.patch}
 .tier-list__roles {
   max-width: 100%;
   overflow-x: auto;
-}
-
-.tier-list__rank {
-  padding: 2px var(--space-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--fill-panel-2);
-  color: var(--text-primary);
-  font: inherit;
-  font-size: var(--text-sm);
 }
 
 .tier-list {
@@ -170,14 +146,6 @@ const title = computed(() => (meta.data ? `Tier list · Patch ${meta.data.patch}
 .tier-list__tier {
   justify-content: center;
   min-width: 2.5em;
-}
-
-.tier-list__winrate--positive {
-  color: var(--state-positive);
-}
-
-.tier-list__winrate--negative {
-  color: var(--state-negative);
 }
 
 .tier-list__more {

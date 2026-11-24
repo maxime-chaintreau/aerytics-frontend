@@ -11,6 +11,7 @@ import RuneIcon from "@/components/game/icon/RuneIcon.vue";
 import SummonerSpellIcon from "@/components/game/icon/SummonerSpellIcon.vue";
 import Tag from "@/components/ui/Tag.vue";
 import Dialog from "@/components/ui/Dialog.vue";
+import ChampionLink from "@/components/game/ChampionLink.vue";
 
 const RunePageDetail = defineAsyncComponent(() => import("@/components/game/RunePageDetail.vue"));
 
@@ -48,7 +49,9 @@ const runesOpen = ref(false);
     <!-- ===== Champion, spells, runes ===== -->
     <div class="match-header__loadout">
       <div class="match-header__champion">
-        <ChampionIcon :champion-id="player.championId" :size="64" decorative />
+        <ChampionLink :champion-id="player.championId" :role="player.role">
+          <ChampionIcon :champion-id="player.championId" :size="64" />
+        </ChampionLink>
         <span class="match-header__level" :title="`Niveau ${player.championLevel}`">{{ player.championLevel }}</span>
       </div>
       <div class="match-header__pair">

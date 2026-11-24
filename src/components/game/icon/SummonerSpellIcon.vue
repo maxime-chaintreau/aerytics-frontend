@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
+import { useImageFallback } from "@/composables/useImageFallback";
 import { useStaticDataStore } from "@/stores/staticData";
 
 const props = withDefaults(
@@ -21,15 +22,14 @@ const src = computed(() => (spell.value ? staticData.summonerSpellIconUrl(spell.
 
 const name = computed(() => (spell.value ? `${spell.value.name}${props.upgraded ? " (améliorée)" : ""}` : undefined));
 
-const failedSrc = ref<string>();
-const failed = computed(() => src.value !== undefined && src.value === failedSrc.value);
+const { shown, onError } = useImageFallback(src);
 </script>
 
 <template>
   <img
-    v-if="src && !failed"
+    v-if="shown"
     class="spell-icon"
-    :src="src"
+    :src="shown"
     :class="{ 'spell-icon--upgraded': upgraded }"
     :alt="decorative ? '' : name"
     :title="name"
@@ -38,7 +38,7 @@ const failed = computed(() => src.value !== undefined && src.value === failedSrc
     :height="size ?? 22"
     loading="lazy"
     decoding="async"
-    @error="failedSrc = src"
+    @error="onError"
   />
   <span
     v-else

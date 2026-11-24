@@ -1,14 +1,28 @@
-// Data From Data Dragon, reduced to what the app uses
-
 export interface ChampionInfo {
-  /** numeric id used everywhere in the API: 103 */
   key: number;
-  /** text id used by Data Dragon: "Ahri", "MonkeyKing" (Wukong) */
   id: string;
-  /** display name in the chosen language: "Ahri", "Wukong" */
   name: string;
-  /** icon file name: "Ahri.png" */
+  title: string;
+  tags: ChampionClass[];
   image: string;
+}
+
+export type ChampionClass = "Assassin" | "Fighter" | "Mage" | "Marksman" | "Support" | "Tank";
+
+export interface ChampionSpellInfo {
+  id: string;
+  name: string;
+  description: string;
+  cooldowns: number[];
+  costs: number[];
+  range: number[];
+  image: string;
+}
+
+export interface ChampionDetails {
+  key: number;
+  passive: { name: string; description: string; image: string };
+  spells: ChampionSpellInfo[];
 }
 
 export interface ItemInfo {

@@ -1,4 +1,4 @@
-import type { MatchParticipant, ObjectiveName, StatKey } from "@/types/match";
+import type { MatchParticipant, ObjectiveName, StatKey, PingType } from "@/types/match";
 import { formatDecimal, formatDuration, formatInteger, formatPercent } from "@/utils/format";
 
 type StatFormat = "integer" | "decimal1" | "decimal2" | "percent" | "duration" | "yesNo";
@@ -334,8 +334,6 @@ export const TEAM_OBJECTIVES: { name: Exclude<ObjectiveName, "champion">; label:
 ];
 
 // ---------- Pings ----------
-
-export type PingType = "allIn" | "assistMe" | "basic" | "command" | "danger" | "enemyMissing" | "enemyVision" | "getBack" | "hold" | "needVision" | "onMyWay" | "push";
 
 export function pingTypeOf(key: StatKey): PingType | null {
   return key.endsWith("Pings") ? (key.slice(0, -"Pings".length) as PingType) : null;

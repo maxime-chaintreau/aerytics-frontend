@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import PlayerSearch from "@/features/home/components/PlayerSearch.vue";
+import SearchBar from "@/components/search/SearchBar.vue";
 
 const route = useRoute();
 </script>
@@ -9,7 +9,7 @@ const route = useRoute();
   <header class="topbar">
     <div class="container topbar__inner">
       <RouterLink to="/" class="brand">Aerytics</RouterLink>
-      <PlayerSearch v-if="route.name !== 'home'" compact class="topbar__search" />
+      <SearchBar v-if="route.name !== 'home'" compact class="topbar__search" />
     </div>
   </header>
 </template>

@@ -17,8 +17,6 @@ export function shopVisits(items: ItemEvent[], gap = 45): ShopVisit[] {
   return visits;
 }
 
-export const SKILL_KEYS: Record<SkillSlot, string> = { 1: "Q", 2: "W", 3: "E", 4: "R" };
-
 export function skillGrid(skills: SkillEvent[]): Record<SkillSlot, boolean[]> {
   const grid: Record<SkillSlot, boolean[]> = { 1: [], 2: [], 3: [], 4: [] };
   skills.forEach(({ slot }, level) => {

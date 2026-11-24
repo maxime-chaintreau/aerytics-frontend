@@ -3,11 +3,14 @@ import { computed, reactive } from "vue";
 import type { MatchDetail } from "@/types/match";
 import type { Region } from "@/types/riot";
 import { useMatchTimeline } from "@/composables/useMatchQueries";
-import { SKILL_KEYS, shopVisits, skillGrid, skillPriority } from "@/features/match/buildLogic";
+import { useChampionAbilities } from "@/composables/useChampionAbilities";
+import { shopVisits, skillGrid, skillPriority } from "@/features/match/buildLogic";
+import { SKILL_KEYS, SKILL_SLOTS } from "@/utils/skills";
 import { useStaticDataStore } from "@/stores/staticData";
 import { formatDuration } from "@/utils/format";
 import Panel from "@/components/ui/Panel.vue";
 import ItemIcon from "@/components/game/icon/ItemIcon.vue";
+import AbilityIcon from "@/components/game/icon/AbilityIcon.vue";
 import PlayerPicker from "@/features/match/components/PlayerPicker.vue";
 
 const props = defineProps<{ match: MatchDetail; region: Region }>();
@@ -26,6 +29,8 @@ const visits = computed(() => shopVisits(frames.value?.items ?? []));
 const grid = computed(() => skillGrid(frames.value?.skills ?? []));
 const priority = computed(() => skillPriority(frames.value?.skills ?? []));
 const levels = computed(() => frames.value?.skills.length ?? 0);
+const championId = computed(() => props.match.participants.find((participant) => participant.puuid === selected.value)?.championId ?? null);
+const { abilities } = useChampionAbilities(championId);
 
 const itemName = (itemId: number) => staticData.item(itemId)?.name ?? "Objet";
 </script>
@@ -70,7 +75,7 @@ const itemName = (itemId: number) => staticData.item(itemId)?.name ?? "Objet";
           Compétences
           <span v-if="priority.length > 0" class="build__priority">
             <template v-for="(slot, index) in priority" :key="slot">
-              <span class="skill-key" :class="`skill-key--${slot}`">{{ SKILL_KEYS[slot] }}</span>
+              <AbilityIcon :src="abilities?.[slot].src" :size="24" :letter="SKILL_KEYS[slot]" class="skill-icon" :class="`skill-key--${slot}`" />
               <span v-if="index < priority.length - 1" aria-label="puis"> › </span>
             </template>
           </span>
@@ -85,9 +90,11 @@ const itemName = (itemId: number) => staticData.item(itemId)?.name ?? "Objet";
               </tr>
             </thead>
             <tbody>
-              <tr v-for="slot in [1, 2, 3, 4] as const" :key="slot">
-                <th scope="row">
+              <tr v-for="slot in SKILL_SLOTS" :key="slot">
+                <th scope="row" class="skills__row-head">
+                  <AbilityIcon :src="abilities?.[slot].src" :size="20" />
                   <span class="skill-key" :class="`skill-key--${slot}`">{{ SKILL_KEYS[slot] }}</span>
+                  <span v-if="abilities" class="visually-hidden">({{ abilities[slot].name }})</span>
                 </th>
                 <td v-for="(leveled, index) in grid[slot]" :key="index" class="skills__cell">
                   <span v-if="leveled" class="skills__point" :class="`skills__point--${slot}`">{{ SKILL_KEYS[slot] }}</span>
@@ -123,6 +130,9 @@ const itemName = (itemId: number) => staticData.item(itemId)?.name ?? "Objet";
 }
 
 .build__priority {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   font-weight: 400;
   color: var(--text-secondary);
 }
@@ -227,6 +237,17 @@ const itemName = (itemId: number) => staticData.item(itemId)?.name ?? "Objet";
   background: var(--skill-color);
   color: var(--fill-base);
   font-weight: 700;
+}
+
+.skills__row-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-right: var(--space-1);
+}
+
+.skill-icon :deep(.ability__letter) {
+  color: var(--skill-color);
 }
 
 .skill-key {

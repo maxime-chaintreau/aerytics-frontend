@@ -52,15 +52,6 @@ export function sortChampionPool<T extends Record<ChampionSortKey, number>>(entr
   return [...entries].sort((a, b) => sign * (a[key] - b[key]) || b.games - a.games);
 }
 
-export type WinrateTone = "positive" | "negative" | "neutral";
-
-/** ≥ 55 % green, ≤ 45 % red, in between neutral */
-export function winrateTone(winrate: number): WinrateTone {
-  if (winrate >= 0.55) return "positive";
-  if (winrate <= 0.45) return "negative";
-  return "neutral";
-}
-
 // ---------- You vs the average ----------
 
 export interface MetricDefinition {

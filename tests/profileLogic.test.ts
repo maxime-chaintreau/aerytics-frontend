@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import type { LpHistoryPoint } from "@/types/profile";
 import type { Rank } from "@/types/riot";
-import { lastPromotion, lpChartHeights, lpDelta, sortChampionPool, winrateTone, compareToAverage, BENCHMARK_METRICS, matchKda, csPerMinute } from "@/features/profile/profileLogic";
+import { lastPromotion, lpChartHeights, lpDelta, sortChampionPool, compareToAverage, BENCHMARK_METRICS, matchKda, csPerMinute } from "@/features/profile/profileLogic";
 
 const point = (date: string, rank: Rank, lpChange = 0): LpHistoryPoint => ({ start: date, end: date, rank, lpChange });
 
@@ -65,13 +65,6 @@ describe("sortChampionPool", () => {
     sortChampionPool(pool, "kda", "asc");
     expect(ids(pool)).toEqual([1, 2, 3]);
   });
-});
-
-test("winrateTone", () => {
-  expect(winrateTone(0.57)).toBe("positive");
-  expect(winrateTone(0.55)).toBe("positive");
-  expect(winrateTone(0.5)).toBe("neutral");
-  expect(winrateTone(0.45)).toBe("negative");
 });
 
 describe("compareToAverage", () => {

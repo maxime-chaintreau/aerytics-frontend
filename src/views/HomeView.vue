@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import PlayerSearch from "@/features/home/components/PlayerSearch.vue";
+import SearchBar from "@/components/search/SearchBar.vue";
 import TierListCard from "@/features/home/components/TierListCard.vue";
 import RecentSearches from "@/features/home/components/RecentSearches.vue";
 import LadderCard from "@/features/home/components/LadderCard.vue";
@@ -10,7 +10,7 @@ import LadderCard from "@/features/home/components/LadderCard.vue";
     <section class="home__hero" aria-labelledby="home-title">
       <h1 id="home-title" class="home__title" tabindex="-1">Aerytics</h1>
       <p class="home__tagline">Les stats de tes parties classées, analysées jusqu'au moindre ping.</p>
-      <PlayerSearch class="home__search" />
+      <SearchBar class="home__search" />
     </section>
 
     <div class="home__grid">

@@ -3,7 +3,8 @@ import { reactive, ref } from "vue";
 import { REGIONS, type Region } from "@/types/riot";
 import { useLadder } from "@/composables/useSearchQueries";
 import { useRecentSearches } from "@/composables/useRecentSearches";
-import { formatRiotId, toRiotIdSlug } from "@/utils/riotId";
+import { profileRoute } from "@/router/links";
+import { formatRiotId } from "@/utils/riotId";
 import { formatRegion } from "@/utils/labels";
 import Panel from "@/components/ui/Panel.vue";
 import PlayerIdentity from "@/components/game/PlayerIdentity.vue";
@@ -36,7 +37,7 @@ const ladder = reactive(useLadder(region));
     <ol v-else class="ladder" :aria-busy="ladder.isLoading">
       <li v-for="(card, index) in ladder.data.players" :key="formatRiotId(card.riotId)" class="ladder__row">
         <span class="ladder__place" :class="{ 'ladder__place--top': index < 3 }">{{ index + 1 }}</span>
-        <RouterLink class="ladder__link" :to="{ name: 'profile', params: { region: card.region, riotId: toRiotIdSlug(card.riotId) } }">
+        <RouterLink class="ladder__link" :to="profileRoute(card)">
           <PlayerIdentity :player="card" show-lp />
         </RouterLink>
       </li>

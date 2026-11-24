@@ -1,4 +1,4 @@
-import type { ChampionsByKey, ItemsById, RunesData, SummonerSpellsByKey } from "@/types/staticData";
+import type { ChampionsByKey, ItemsById, RunesData, SummonerSpellsByKey, ChampionDetails } from "@/types/staticData";
 import { getJson } from "./http";
 
 const DDRAGON_URL = "https://ddragon.leagueoflegends.com";
@@ -28,6 +28,10 @@ export const staticDataService = {
   getSummonerSpells(version: string, signal?: AbortSignal): Promise<SummonerSpellsByKey> {
     return getJson(staticPath(version, "summonerSpells"), signal);
   },
+
+  getChampionDetails(version: string, championKey: number, signal?: AbortSignal): Promise<ChampionDetails> {
+    return getJson(staticPath(version, `champions/${championKey}`), signal);
+  },
 };
 
 // ---------- Image URLs (the browser loads them through <img>) ----------
@@ -40,4 +44,6 @@ export const ddragonImage = {
   summonerSpell: (version: string, image: string) => `${DDRAGON_URL}/cdn/${version}/img/spell/${image}`,
   rune: (icon: string) => `${DDRAGON_URL}/cdn/img/${icon}`,
   map: (version: string, mapId: number) => `${DDRAGON_URL}/cdn/${version}/img/map/map${mapId}.png`,
+  championSpell: (version: string, image: string) => `${DDRAGON_URL}/cdn/${version}/img/spell/${image}`,
+  passive: (version: string, image: string) => `${DDRAGON_URL}/cdn/${version}/img/passive/${image}`,
 };

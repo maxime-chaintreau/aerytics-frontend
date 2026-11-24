@@ -185,3 +185,6 @@ export interface MatchDetail {
   teams: [MatchTeam, MatchTeam];
   participants: MatchParticipant[];
 }
+
+/** the ping kinds counted per player: the "<type>Pings" stats, and the icon files' names */
+export type PingType = "allIn" | "assistMe" | "basic" | "command" | "danger" | "enemyMissing" | "enemyVision" | "getBack" | "hold" | "needVision" | "onMyWay" | "push";

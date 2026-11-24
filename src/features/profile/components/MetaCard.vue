@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { computed, shallowRef, watch } from "vue";
-import type { MetaTier } from "@/types/meta";
 import type { PlayerKey, Role, RoleFilter, Tier } from "@/types/riot";
 import { profileKeys, useProfileSummary } from "@/composables/useProfileQueries";
 import { useRoleMeta } from "@/composables/useMetaQueries";
 import { useStaticDataStore } from "@/stores/staticData";
-import { winrateTone } from "@/features/profile/profileLogic";
+import { statsTierFor } from "@/utils/statsTier";
+import { metaTierTone, statWinrateTone } from "@/utils/tones";
 import { formatRole, formatTier } from "@/utils/labels";
 import { formatPercent } from "@/utils/format";
 import Panel from "@/components/ui/Panel.vue";
 import Tag from "@/components/ui/Tag.vue";
 import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
+import ChampionLink from "@/components/game/ChampionLink.vue";
 
 const props = defineProps<{ player: PlayerKey; role: RoleFilter }>();
 
@@ -39,7 +40,6 @@ const facts = computed(() => {
   return last && last.player === playerId(props.player) ? last : null;
 });
 
-
 const metaRole = computed<Role | null>(() => {
   if (!facts.value) return null;
   return props.role === "ALL" || props.role === "MAIN" ? facts.value.mainRole : props.role;
@@ -58,8 +58,6 @@ const title = computed(() => {
 });
 
 const tierText = computed(() => (minTier.value ? `${formatTier(minTier.value)}+` : "Tous rangs"));
-
-const tierTone = (tier: MetaTier) => (tier === "S+" ? "gold" : "neutral");
 </script>
 
 <template>
@@ -75,10 +73,12 @@ const tierTone = (tier: MetaTier) => (tier === "S+" ? "gold" : "neutral");
       <ol class="meta">
         <li v-for="(entry, index) in champions" :key="entry.championId" class="meta__row">
           <span class="meta__rank">{{ index + 1 }}</span>
-          <ChampionIcon :champion-id="entry.championId" :size="28" decorative />
-          <span class="meta__name">{{ staticData.champion(entry.championId)?.name ?? "…" }}</span>
-          <Tag :tone="tierTone(entry.tier)" class="meta__tier">{{ entry.tier }}</Tag>
-          <span class="meta__winrate" :class="`meta__winrate--${winrateTone(entry.winrate)}`"> <span class="visually-hidden">winrate </span>{{ formatPercent(entry.winrate) }} </span>
+          <ChampionLink :champion-id="entry.championId" :role="metaRole" :tier="statsTierFor(minTier)" class="meta__champion">
+            <ChampionIcon :champion-id="entry.championId" :size="28" decorative />
+            <span class="meta__name">{{ staticData.champion(entry.championId)?.name ?? "…" }}</span>
+          </ChampionLink>
+          <Tag :tone="metaTierTone(entry.tier)" class="meta__tier">{{ entry.tier }}</Tag>
+          <span class="meta__winrate" :class="`tone-${statWinrateTone(entry.winrate)}`"> <span class="visually-hidden">winrate </span>{{ formatPercent(entry.winrate) }} </span>
         </li>
       </ol>
     </div>
@@ -93,13 +93,11 @@ const tierTone = (tier: MetaTier) => (tier === "S+" ? "gold" : "neutral");
 }
 
 .meta__row {
-  display: grid;
-  grid-template-columns: 1.5ch auto minmax(0, 1fr) auto 3.5em;
-  align-items: center;
-  gap: var(--space-2);
-  padding-block: var(--space-2);
-  border-bottom: 1px solid var(--line);
-  font-size: var(--text-sm);
+  grid-template-columns: 1.5ch minmax(0, 1fr) auto 3.5em;
+}
+
+.meta__champion {
+  min-width: 0;
 }
 
 .meta__row:nth-child(n + 11) {
@@ -128,14 +126,6 @@ const tierTone = (tier: MetaTier) => (tier === "S+" ? "gold" : "neutral");
 
 .meta__winrate {
   text-align: right;
-}
-
-.meta__winrate--positive {
-  color: var(--state-positive);
-}
-
-.meta__winrate--negative {
-  color: var(--state-negative);
 }
 
 .meta__skeleton {

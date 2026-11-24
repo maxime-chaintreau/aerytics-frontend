@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { formatRankName, formatRank, formatRole, formatTier, tierColor, formatResult, formatQueue } from "@/utils/labels";
+import { formatRankName, formatRank, formatRole, formatSide, formatTier, tierColor, formatResult, formatQueue } from "@/utils/labels";
 
 test("formatTier", () => {
   expect(formatTier("EMERALD")).toBe("Émeraude");
@@ -27,4 +27,9 @@ test("formatResult and formatQueue", () => {
 test("formatRankName: no LP, no division from Master", () => {
   expect(formatRankName({ tier: "EMERALD", division: "II" })).toBe("Émeraude II");
   expect(formatRankName({ tier: "MASTER", division: null })).toBe("Maître");
+});
+
+test("formatSide", () => {
+  expect(formatSide("BLUE")).toBe("Équipe bleue");
+  expect(formatSide("RED")).toBe("Équipe rouge");
 });

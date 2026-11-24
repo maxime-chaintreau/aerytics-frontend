@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import type { MatchDetail, TeamSide } from "@/types/match";
+import type { MatchDetail } from "@/types/match";
 import { type DamageMode, type DamageSplit, damageSplit, teamDamageSplit } from "@/features/match/buildLogic";
 import { teamOf } from "@/features/match/matchLogic";
+import { formatSide } from "@/utils/labels";
 import { useStaticDataStore } from "@/stores/staticData";
 import { formatCompact, formatInteger, formatPercent } from "@/utils/format";
 import Panel from "@/components/ui/Panel.vue";
@@ -25,9 +26,6 @@ const TYPES = [
   { key: "true", label: "Bruts" },
 ] as const;
 
-const SIDE_NAMES: Record<TeamSide, string> = { BLUE: "Équipe bleue", RED: "Équipe rouge" };
-
-/** every bar is scaled on the biggest total of the game: bars compare across both teams */
 const maxTotal = computed(() => Math.max(1, ...props.match.participants.map((player) => damageSplit(player, mode.value).total)));
 
 const teams = computed(() =>
@@ -42,7 +40,6 @@ const teams = computed(() =>
   }),
 );
 
-/** "Physiques 12 400 (61 %)": the title of a bar segment and the screen reader text */
 const describe = (split: DamageSplit) => TYPES.map(({ key, label }) => `${label} ${formatInteger(split[key])} (${formatPercent(split[key] / Math.max(1, split.total))})`).join(", ");
 </script>
 
@@ -58,10 +55,10 @@ const describe = (split: DamageSplit) => TYPES.map(({ key, label }) => `${label}
     </ul>
 
     <div class="damage">
-      <section v-for="team in teams" :key="team.side" class="damage__team" :class="`damage__team--${team.side.toLowerCase()}`" :aria-label="SIDE_NAMES[team.side]">
+      <section v-for="team in teams" :key="team.side" class="damage__team" :class="`damage__team--${team.side.toLowerCase()}`" :aria-label="formatSide(team.side)">
         <!-- the team's profile: 100% wide, the share of each type -->
         <div class="damage__profile">
-          <span class="damage__team-name">{{ SIDE_NAMES[team.side] }}</span>
+          <span class="damage__team-name">{{ formatSide(team.side) }}</span>
           <span class="damage__total">{{ formatCompact(team.total.total) }}</span>
           <span class="bar bar--full" :title="describe(team.total)">
             <span

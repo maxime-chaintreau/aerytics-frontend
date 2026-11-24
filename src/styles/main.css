@@ -112,6 +112,18 @@ a {
   white-space: nowrap;
 }
 
+.tone-positive {
+  color: var(--state-positive);
+}
+
+.tone-negative {
+  color: var(--state-negative);
+}
+
+.tone-gold {
+  color: var(--accent-gold);
+}
+
 /* ---------- Layout ---------- */
 
 #app {

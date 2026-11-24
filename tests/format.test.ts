@@ -1,5 +1,17 @@
 import { expect, test } from "vitest";
-import { formatDecimal, formatInteger, formatCompact, formatDuration, formatPercent, formatRelativeTime, formatSigned, formatShortDate, formatMonth, formatDateTime } from "@/utils/format";
+import {
+  formatDecimal,
+  formatInteger,
+  formatCompact,
+  formatDuration,
+  formatPercent,
+  formatRelativeTime,
+  formatSigned,
+  formatShortDate,
+  formatMonth,
+  formatDateTime,
+  formatOrdinal,
+} from "@/utils/format";
 
 // French formatting uses narrow no-break spaces: normalize them to compare.
 const plain = (text: string) => text.replace(/[\u202f\u00a0]/g, " ");
@@ -51,4 +63,9 @@ test("formatInteger: thousands separator, no decimals", () => {
 
 test("formatCompact: thousands as k", () => {
   expect(formatCompact(58340).replace(/\s/g, " ")).toBe("58,3 k");
+});
+
+test("formatOrdinal", () => {
+  expect(formatOrdinal(1)).toBe("1er");
+  expect(formatOrdinal(2)).toBe("2e");
 });

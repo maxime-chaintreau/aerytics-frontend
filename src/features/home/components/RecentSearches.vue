@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRecentSearches } from "@/composables/useRecentSearches";
-import { formatRiotId, toRiotIdSlug } from "@/utils/riotId";
+import { profileRoute } from "@/router/links";
+import { formatRiotId } from "@/utils/riotId";
 import Panel from "@/components/ui/Panel.vue";
 import PlayerIdentity from "@/components/game/PlayerIdentity.vue";
 
@@ -17,7 +18,7 @@ const { recent, remove, clear } = useRecentSearches();
 
     <ul v-else class="recent">
       <li v-for="card in recent" :key="`${card.region}/${formatRiotId(card.riotId)}`" class="recent__row">
-        <RouterLink class="recent__link" :to="{ name: 'profile', params: { region: card.region, riotId: toRiotIdSlug(card.riotId) } }">
+        <RouterLink class="recent__link" :to="profileRoute(card)">
           <PlayerIdentity :player="card" show-region />
         </RouterLink>
         <button type="button" class="recent__remove" :aria-label="`Retirer ${formatRiotId(card.riotId)} des recherches récentes`" @click="remove(card)">

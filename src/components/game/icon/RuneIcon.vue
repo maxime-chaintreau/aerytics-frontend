@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
+import { useImageFallback } from "@/composables/useImageFallback";
 import { useStaticDataStore } from "@/stores/staticData";
 
 const shardFiles = import.meta.glob<string>("@/assets/riot/shards/*", { eager: true, query: "?url", import: "default" });
@@ -29,16 +30,15 @@ const resolved = computed(() => {
   return { name: info?.name, src: info ? staticData.runeIconUrl(info) : undefined };
 });
 
-const failedSrc = ref<string>();
-const failed = computed(() => resolved.value.src !== undefined && resolved.value.src === failedSrc.value);
+const { shown, onError } = useImageFallback(() => resolved.value.src);
 </script>
 
 <template>
   <img
-    v-if="resolved.src && !failed"
+    v-if="shown"
     class="rune-icon"
     :class="{ 'rune-icon--shard': isShard }"
-    :src="resolved.src"
+    :src="shown"
     :alt="decorative ? '' : (resolved.name ?? 'Rune')"
     :title="resolved.name"
     :style="sizeStyle"
@@ -46,7 +46,7 @@ const failed = computed(() => resolved.value.src !== undefined && resolved.value
     :height="size ?? 24"
     loading="lazy"
     decoding="async"
-    @error="failedSrc = resolved.src"
+    @error="onError"
   />
   <span
     v-else

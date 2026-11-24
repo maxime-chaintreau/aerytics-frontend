@@ -1,17 +1,7 @@
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import type { Role, RoleFilter } from "@/types/riot";
-
-const ROLE_SLUGS: Record<Role | "ALL", string> = {
-  ALL: "all",
-  TOP: "top",
-  JUNGLE: "jungle",
-  MID: "mid",
-  BOTTOM: "adc",
-  SUPPORT: "support",
-};
-
-const SLUG_TO_ROLE = new Map(Object.entries(ROLE_SLUGS).map(([role, slug]) => [slug, role as Role | "ALL"]));
+import type { RoleFilter } from "@/types/riot";
+import { ROLE_SLUGS, SLUG_TO_ROLE } from "@/utils/roleSlugs";
 
 export function useRoleFilter() {
   const route = useRoute();

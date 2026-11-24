@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { PlayerKey } from "@/types/riot";
+import { matchRoute } from "@/router/links";
 import { formatResult } from "@/utils/labels";
 import type { MatchSummary } from "@/types/profile";
 import { useStaticDataStore } from "@/stores/staticData";
 import { csPerMinute, matchKda } from "@/features/profile/profileLogic";
-import { toRiotIdSlug } from "@/utils/riotId";
 import { formatDecimal, formatDuration, formatRelativeTime, formatSigned } from "@/utils/format";
 import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
 import ItemSlots from "@/components/game/ItemSlots.vue";
@@ -15,10 +15,7 @@ const props = defineProps<{ match: MatchSummary; player: PlayerKey }>();
 
 const staticData = useStaticDataStore();
 
-const link = computed(() => ({
-  name: "match",
-  params: { region: props.player.region, riotId: toRiotIdSlug(props.player.riotId), matchId: props.match.matchId },
-}));
+const link = computed(() => matchRoute(props.player, props.match.matchId));
 
 const championName = computed(() => staticData.champion(props.match.championId)?.name ?? "…");
 const opponentName = computed(() => (props.match.opponentChampionId === null ? null : (staticData.champion(props.match.opponentChampionId)?.name ?? "…")));

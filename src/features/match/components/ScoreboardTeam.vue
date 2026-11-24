@@ -5,19 +5,22 @@ import type { Region } from "@/types/riot";
 import type { PlayerAnalysis } from "@/types/analysis";
 import { useStaticDataStore } from "@/stores/staticData";
 import { upgradedSpell } from "@/features/match/matchLogic";
-import { STAT_DEFINITIONS, type ScoreboardColumn, barRatios, bestValue, formatStat, healAndShield, TEAM_OBJECTIVES, pingTypeOf, objectiveOf } from "@/features/match/matchStats";
-import { formatRankName, formatResult } from "@/utils/labels";
-import { formatCompact, formatDecimal, formatInteger, formatPercent } from "@/utils/format";
-import { formatRiotId, toRiotIdSlug } from "@/utils/riotId";
+import { STAT_DEFINITIONS, type ScoreboardColumn, barRatios, bestValue, formatStat, healAndShield, pingTypeOf, objectiveOf } from "@/features/match/matchStats";
+import { formatRankName } from "@/utils/labels";
+import { formatDecimal, formatInteger, formatPercent } from "@/utils/format";
+import { profileRoute } from "@/router/links";
+import { formatRiotId } from "@/utils/riotId";
 import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
 import RankIcon from "@/components/game/icon/RankIcon.vue";
 import ItemSlots from "@/components/game/ItemSlots.vue";
 import RuneIcon from "@/components/game/icon/RuneIcon.vue";
 import SummonerSpellIcon from "@/components/game/icon/SummonerSpellIcon.vue";
 import PlaceBadge from "@/features/match/components/PlaceBadge.vue";
+import ScoreboardTeamHeader from "@/features/match/components/ScoreboardTeamHeader.vue";
 import ProfileIcon from "@/components/game/icon/ProfileIcon.vue";
 import PingIcon from "@/components/game/icon/PingIcon.vue";
 import ObjectiveIcon from "@/components/game/icon/ObjectiveIcon.vue";
+import ChampionLink from "@/components/game/ChampionLink.vue";
 
 const props = defineProps<{
   team: MatchTeam;
@@ -34,8 +37,6 @@ const props = defineProps<{
 defineEmits<{ openRunes: [participant: MatchParticipant] }>();
 
 const staticData = useStaticDataStore();
-
-const SIDE_LABELS = { BLUE: "Équipe bleue", RED: "Équipe rouge" } as const;
 
 const headerId = useId();
 
@@ -54,17 +55,6 @@ const performanceOf = computed(() => new Map(props.performance?.map((analysis) =
 const result = computed(() => (props.remake ? "REMAKE" : props.team.win ? "WIN" : "LOSS"));
 
 const fixedWidth = computed(() => 112 + props.columns.reduce((sum, column) => sum + COLUMN_WIDTHS[column.kind], 0));
-
-// ---------- team totals ----------
-
-const sum = (valueOf: (player: MatchParticipant) => number) => props.players.reduce((total, player) => total + valueOf(player), 0);
-
-const totals = computed(() => ({
-  kills: sum(({ stats }) => stats.kills),
-  deaths: sum(({ stats }) => stats.deaths),
-  assists: sum(({ stats }) => stats.assists),
-  gold: sum(({ stats }) => stats.gold),
-}));
 
 // ---------- bars and highlights, over the whole game ----------
 
@@ -90,42 +80,13 @@ const damageShares = ({ stats }: MatchParticipant) => {
 
 const championName = (id: number) => staticData.champion(id)?.name ?? "Champion";
 
-const profileLink = ({ riotId }: MatchParticipant) => ({
-  name: "profile",
-  params: { region: props.region, riotId: toRiotIdSlug(riotId) },
-});
+const profileLink = ({ riotId }: MatchParticipant) => profileRoute({ region: props.region, riotId });
 </script>
 
 <template>
   <div class="team" :class="`team--${team.side.toLowerCase()}`">
-    <div :id="headerId" class="team__header">
-      <span class="team__result" :class="`team__result--${result.toLowerCase()}`">{{ formatResult(result) }}</span>
-      <span class="team__side">{{ SIDE_LABELS[team.side] }}</span>
-      <ul class="team__bans" aria-label="Bannissements">
-        <li v-for="(championId, index) in team.bans" :key="index" class="team__ban" :class="{ 'team__ban--none': championId === -1 }">
-          <ChampionIcon v-if="championId !== -1" :champion-id="championId" :size="22" />
-          <span v-else class="team__ban-none" role="img" aria-label="Pas de bannissement">–</span>
-        </li>
-      </ul>
+    <ScoreboardTeamHeader :id="headerId" :team="team" :players="players" :result="result" />
 
-      <ul class="team__objectives" aria-label="Objectifs">
-        <li
-          v-for="{ name, label, first } in TEAM_OBJECTIVES"
-          :key="name"
-          class="team__objective"
-          :class="{ 'team__objective--first': team.objectives[name].first }"
-          :title="team.objectives[name].first ? `${label} · ${first}` : label"
-        >
-          <ObjectiveIcon :objective="name" :side="team.side" :size="18" />
-          {{ team.objectives[name].kills }}
-          <span class="visually-hidden">{{ label }}{{ team.objectives[name].first ? `, ${first}` : "" }}</span>
-        </li>
-      </ul>
-      <span class="team__totals">
-        <span>{{ totals.kills }} / {{ totals.deaths }} / {{ totals.assists }}</span>
-        <span>{{ formatCompact(totals.gold) }} or</span>
-      </span>
-    </div>
     <div class="team__scroll">
       <table class="team__table" :style="{ minWidth: `calc(${fixedWidth}px + var(--player-col))` }" :aria-labelledby="headerId">
         <colgroup>
@@ -163,7 +124,9 @@ const profileLink = ({ riotId }: MatchParticipant) => ({
             <td class="team__left">
               <div class="team__loadout">
                 <span class="team__champion">
-                  <ChampionIcon :champion-id="player.championId" :size="36" />
+                  <ChampionLink :champion-id="player.championId" :role="player.role">
+                    <ChampionIcon :champion-id="player.championId" :size="36" />
+                  </ChampionLink>
                   <span class="team__level">{{ player.championLevel }}</span>
                   <span v-if="player.mastery" class="team__mastery" :title="`Maîtrise ${player.mastery.level} · ${formatInteger(player.mastery.points)} points`">
                     {{ player.mastery.level }}
@@ -308,117 +271,6 @@ const profileLink = ({ riotId }: MatchParticipant) => ({
   border-spacing: 0;
   table-layout: fixed;
   font-size: var(--text-sm);
-}
-
-.team__header {
-  padding: var(--space-3) var(--space-3) var(--space-2);
-  font-size: var(--text-sm);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-}
-
-.team__result {
-  padding: 2px var(--space-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-display);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-.team__result--win {
-  border-color: var(--accent-gold);
-  background: var(--accent-gold);
-  color: var(--fill-base);
-}
-
-.team__side {
-  font-weight: var(--weight-semibold);
-  color: var(--team-color);
-}
-
-/* ----- bans ----- */
-.team__bans {
-  display: flex;
-  gap: 3px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.team__ban {
-  position: relative;
-  border-radius: var(--radius-sm);
-  box-shadow: 0 0 0 1px var(--state-negative);
-}
-
-.team__ban > * {
-  filter: grayscale(1);
-  opacity: 0.6;
-}
-
-.team__ban::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(to top right, transparent calc(50% - 1px), var(--state-negative) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
-  pointer-events: none;
-}
-
-.team__ban--none {
-  box-shadow: none;
-}
-
-.team__ban--none::after {
-  content: none;
-}
-
-.team__ban-none {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-sm);
-  background: var(--fill-hover);
-  color: var(--text-secondary);
-}
-
-/* ----- objectives ----- */
-.team__objectives {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.team__objective {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: var(--weight-semibold);
-  font-variant-numeric: tabular-nums;
-  color: var(--team-color);
-}
-
-.team__objective--first {
-  color: var(--accent-gold);
-}
-
-.team__totals {
-  display: flex;
-  gap: var(--space-3);
-  margin-left: auto;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--text-secondary);
 }
 
 /* ----- cells ----- */

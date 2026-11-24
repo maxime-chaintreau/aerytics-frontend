@@ -2,18 +2,19 @@
 import { computed, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { usePlayerFromRoute } from "@/composables/usePlayerFromRoute";
-import { useMatchAnalysis, useMatchDetail, useMatchTimeline } from "@/composables/useMatchQueries";
+import { useMatchDetail, useMatchTimeline, useMatchAnalysis } from "@/composables/useMatchQueries";
 import { usePageTitle } from "@/composables/usePageTitle";
 import { useStaticDataStore } from "@/stores/staticData";
-import { focusedParticipant } from "@/features/match/matchLogic";
 import { isNotFound } from "@/services/http";
-import { formatRiotId, toRiotIdSlug } from "@/utils/riotId";
+import { formatRiotId } from "@/utils/riotId";
+import { profileRoute } from "@/router/links";
+import { formatResult } from "@/utils/labels";
+import { focusedParticipant } from "@/features/match/matchLogic";
 import MatchHeader from "@/features/match/components/MatchHeader.vue";
 import Scoreboard from "@/features/match/components/Scoreboard.vue";
 import TimelineGraph from "@/features/match/components/TimelineGraph.vue";
 import WinProbability from "@/features/match/components/WinProbability.vue";
 import PerformancePanel from "@/features/match/components/PerformancePanel.vue";
-import { formatResult } from "@/utils/labels";
 import BuildOrder from "@/features/match/components/BuildOrder.vue";
 import DamageBreakdown from "@/features/match/components/DamageBreakdown.vue";
 import MatchMap from "@/features/match/components/MatchMap.vue";
@@ -43,7 +44,7 @@ const selectedPuuid = computed({
 
 const notFound = computed(() => player.value === null || matchId.value === null || isNotFound(match.error));
 
-const profileLink = computed(() => (player.value ? { name: "profile", params: { region: player.value.region, riotId: toRiotIdSlug(player.value.riotId) } } : "/"));
+const profileLink = computed(() => (player.value ? profileRoute(player.value) : "/"));
 </script>
 
 <template>

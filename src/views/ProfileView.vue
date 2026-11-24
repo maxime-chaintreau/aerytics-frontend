@@ -7,7 +7,7 @@ import { useProfileSummary } from "@/composables/useProfileQueries";
 import { useProfileRefresh } from "@/composables/useProfileRefresh";
 import { useRecentSearches } from "@/composables/useRecentSearches";
 import { isNotFound } from "@/services/http";
-import { formatRole } from "@/utils/labels";
+import { ROLE_OPTIONS, formatRole } from "@/utils/labels";
 import SegmentedControl from "@/components/ui/SegmentedControl.vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
 import RoleIcon from "@/components/game/icon/RoleIcon.vue";
@@ -35,14 +35,7 @@ watch(
 
 // ---------- Role selector ----------
 
-const ROLE_OPTIONS: { value: Role | "ALL"; label: string }[] = [
-  { value: "ALL", label: "Tous" },
-  { value: "TOP", label: "Top" },
-  { value: "JUNGLE", label: "Jungle" },
-  { value: "MID", label: "Mid" },
-  { value: "BOTTOM", label: "ADC" },
-  { value: "SUPPORT", label: "Support" },
-];
+const PROFILE_ROLE_OPTIONS: { value: Role | "ALL"; label: string }[] = [{ value: "ALL", label: "Tous" }, ...ROLE_OPTIONS];
 
 const selectedRole = computed<Role | "ALL" | null>({
   get: () => (role.value === "MAIN" ? (summary.data?.mainRole ?? null) : role.value),
@@ -73,7 +66,7 @@ const { refreshAll, isRefreshing, hasError } = useProfileRefresh(player);
 
     <div class="profile__toolbar">
       <div class="profile__toolbar-inner">
-        <SegmentedControl v-model="selectedRole" label="Rôle" :options="ROLE_OPTIONS" size="lg">
+        <SegmentedControl v-model="selectedRole" label="Rôle" :options="PROFILE_ROLE_OPTIONS" size="lg">
           <template #option="{ option }">
             <RoleIcon :role="option.value" :size="20" decorative />
             <span class="profile__role-label">{{ option.label }}</span>

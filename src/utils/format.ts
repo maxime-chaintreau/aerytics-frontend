@@ -80,3 +80,6 @@ export function formatMonth(isoDate: string): string {
 export function formatDateTime(isoDate: string): string {
   return dateTimeFormat.format(new Date(isoDate));
 }
+
+/** 1 -> "1er", 2 -> "2e" (French ordinals) */
+export const formatOrdinal = (value: number) => (value === 1 ? "1er" : `${value}e`);

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
+import { useImageFallback } from "@/composables/useImageFallback";
 import { useStaticDataStore } from "@/stores/staticData";
 
 const props = defineProps<{ itemId: number; size?: number }>();
@@ -11,24 +12,11 @@ const staticData = useStaticDataStore();
 const item = computed(() => (props.itemId === 0 ? undefined : staticData.item(props.itemId)));
 const src = computed(() => (item.value ? staticData.itemIconUrl(item.value) : undefined));
 
-const failedSrc = ref<string>();
-const failed = computed(() => src.value !== undefined && src.value === failedSrc.value);
+const { shown, onError } = useImageFallback(src);
 </script>
 
 <template>
-  <img
-    v-if="src && !failed"
-    class="item-icon"
-    :src="src"
-    :alt="item?.name"
-    :title="item?.name"
-    :style="sizeStyle"
-    :width="size ?? 24"
-    :height="size ?? 24"
-    loading="lazy"
-    decoding="async"
-    @error="failedSrc = src"
-  />
+  <img v-if="shown" class="item-icon" :src="shown" :alt="item?.name" :title="item?.name" :style="sizeStyle" :width="size ?? 24" :height="size ?? 24" loading="lazy" decoding="async" @error="onError" />
   <span
     v-else
     class="item-icon item-icon--empty"

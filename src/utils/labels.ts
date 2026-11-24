@@ -1,5 +1,5 @@
-import type { Queue } from "@/types/match";
-import type { MatchResult, Rank, Role, Tier, Region } from "@/types/riot";
+import type { Queue, TeamSide } from "@/types/match";
+import { ROLES, type MatchResult, type Rank, type Role, type Tier, type Region } from "@/types/riot";
 
 const TIER_LABELS: Record<Tier, string> = {
   IRON: "Fer",
@@ -22,6 +22,8 @@ const ROLE_LABELS: Record<Role, string> = {
   SUPPORT: "Support",
 };
 
+export const ROLE_OPTIONS: { value: Role; label: string }[] = ROLES.map((role) => ({ value: role, label: ROLE_LABELS[role] }));
+
 export function formatTier(tier: Tier): string {
   return TIER_LABELS[tier];
 }
@@ -42,6 +44,12 @@ export function formatRank(rank: Rank): string {
 /** CSS color of a tier, from the --tier-* tokens in variables.css */
 export function tierColor(tier: Tier): string {
   return `var(--tier-${tier.toLowerCase()})`;
+}
+
+const SIDE_LABELS: Record<TeamSide, string> = { BLUE: "Équipe bleue", RED: "Équipe rouge" };
+
+export function formatSide(side: TeamSide): string {
+  return SIDE_LABELS[side];
 }
 
 const RESULT_LABELS: Record<MatchResult, string> = {
