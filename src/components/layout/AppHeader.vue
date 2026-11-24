@@ -9,7 +9,7 @@ const route = useRoute();
   <header class="topbar">
     <div class="container topbar__inner">
       <RouterLink to="/" class="brand">Aerytics</RouterLink>
-      <SearchBar v-if="route.name !== 'home'" compact class="topbar__search" />
+      <SearchBar v-if="route.name !== 'home' && route.name !== 'not-found'" compact class="topbar__search" />
     </div>
   </header>
 </template>

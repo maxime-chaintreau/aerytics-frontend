@@ -24,6 +24,14 @@ export function toRiotIdSlug({ gameName, tagLine }: RiotId): string {
   return `${gameName}-${tagLine}`;
 }
 
+/**
+ * "Kaori-EUWEST" -> "Kaori#EUWEST" (last "-" becomes "#", like parseRiotIdSlug splits it), "Kaori" -> "Kaori".
+ */
+export function riotIdSlugToInput(slug: string): string {
+  const index = slug.lastIndexOf("-");
+  return index > 0 ? `${slug.slice(0, index)}#${slug.slice(index + 1)}` : slug;
+}
+
 /** { gameName: 'Kaori', tagLine: 'EUW' } -> "Kaori#EUW" (for display) */
 export function formatRiotId({ gameName, tagLine }: RiotId): string {
   return `${gameName}#${tagLine}`;

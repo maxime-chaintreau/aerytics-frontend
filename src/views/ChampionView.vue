@@ -9,9 +9,12 @@ import { usePageTitle } from "@/composables/usePageTitle";
 import { isNotFound } from "@/services/http";
 import { formatRole } from "@/utils/labels";
 import { formatPercent } from "@/utils/format";
-import { championBySlug } from "@/utils/champion";
+import { championBySlug, championSearchIndex, closestChampions } from "@/utils/champion";
 import SegmentedControl from "@/components/ui/SegmentedControl.vue";
+import NotFoundState from "@/components/ui/NotFoundState.vue";
 import RoleIcon from "@/components/game/icon/RoleIcon.vue";
+import ChampionLink from "@/components/game/ChampionLink.vue";
+import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
 import StatsTierSelect from "@/components/game/StatsTierSelect.vue";
 import ChampionHeader from "@/features/champion/components/ChampionHeader.vue";
 import BuildPanel from "@/features/champion/components/BuildPanel.vue";
@@ -25,7 +28,8 @@ import PatchNotesPanel from "@/features/champion/components/PatchNotesPanel.vue"
 const route = useRoute();
 const staticData = useStaticDataStore();
 
-const champion = computed(() => (typeof route.params.champion === "string" ? championBySlug(staticData.champions, route.params.champion) : undefined));
+const requested = computed(() => (typeof route.params.champion === "string" ? route.params.champion : ""));
+const champion = computed(() => championBySlug(staticData.champions, requested.value));
 const championId = computed(() => champion.value?.key ?? null);
 
 const { role, tier } = useChampionFilters();
@@ -34,6 +38,10 @@ const stats = reactive(useChampionStats(championId, role, tier));
 usePageTitle(() => (champion.value && stats.data ? `${champion.value.name} ${formatRole(stats.data.role)}` : null));
 
 const notFound = computed(() => (staticData.status === "success" && !champion.value) || isNotFound(stats.error));
+
+usePageTitle(() => (notFound.value ? "Champion introuvable" : null));
+
+const suggestions = computed(() => (notFound.value && !champion.value ? closestChampions(championSearchIndex(staticData.champions), requested.value) : []));
 
 // ---------- Filters ----------
 
@@ -55,12 +63,26 @@ const shownRole = computed<Role | null>({
 
 <template>
   <div class="champion-page">
-    <!-- ===== Unknown champion ===== -->
-    <template v-if="notFound">
-      <h1 tabindex="-1">Champion introuvable</h1>
-      <p class="champion-page__muted">Aucun champion ne correspond à cette adresse.</p>
-      <RouterLink to="/" class="button champion-page__home">Retour à l'accueil</RouterLink>
-    </template>
+    <NotFoundState v-if="notFound" :title="champion ? `Pas de statistiques pour ${champion.name}` : 'Champion introuvable'">
+      <template v-if="champion">Ce champion n'a pas encore assez de parties sur ce patch.</template>
+      <template v-else>Aucun champion ne correspond à « {{ requested }} ».</template>
+
+      <template #actions>
+        <RouterLink to="/" class="button">Retour à l'accueil</RouterLink>
+      </template>
+
+      <template v-if="suggestions.length > 0" #extra>
+        <h2 class="champion-page__suggest-title">Tu cherchais peut-être</h2>
+        <ul class="champion-page__suggestions">
+          <li v-for="suggestion in suggestions" :key="suggestion.key">
+            <ChampionLink :champion-id="suggestion.key" class="champion-page__suggestion">
+              <ChampionIcon :champion-id="suggestion.key" :size="40" decorative />
+              {{ suggestion.name }}
+            </ChampionLink>
+          </li>
+        </ul>
+      </template>
+    </NotFoundState>
 
     <template v-else-if="champion && stats.data">
       <ChampionHeader :champion="champion" :stats="stats.data" />
@@ -120,12 +142,34 @@ const shownRole = computed<Role | null>({
   padding-block: var(--space-6);
 }
 
-.champion-page__muted {
+.champion-page__suggest-title {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
-.champion-page__home {
-  align-self: flex-start;
+.champion-page__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.champion-page__suggestion {
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-2);
+  font-weight: 600;
+  background: var(--fill-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.champion-page__suggestion:hover {
+  border-color: var(--accent);
 }
 
 .champion-page__toolbar {

@@ -10,6 +10,7 @@ import { formatRiotId } from "@/utils/riotId";
 import { profileRoute } from "@/router/links";
 import { formatResult } from "@/utils/labels";
 import { focusedParticipant } from "@/features/match/matchLogic";
+import NotFoundState from "@/components/ui/NotFoundState.vue";
 import MatchHeader from "@/features/match/components/MatchHeader.vue";
 import Scoreboard from "@/features/match/components/Scoreboard.vue";
 import TimelineGraph from "@/features/match/components/TimelineGraph.vue";
@@ -45,17 +46,23 @@ const selectedPuuid = computed({
 const notFound = computed(() => player.value === null || matchId.value === null || isNotFound(match.error));
 
 const profileLink = computed(() => (player.value ? profileRoute(player.value) : "/"));
+
+usePageTitle(() => (notFound.value ? "Partie introuvable" : null));
 </script>
 
 <template>
   <div class="match-page">
     <RouterLink v-if="player" :to="profileLink" class="match-page__back"> <span aria-hidden="true">←</span> Profil de {{ formatRiotId(player.riotId) }} </RouterLink>
 
-    <!-- ===== Unknown game for this player ===== -->
-    <template v-if="notFound">
-      <h1 tabindex="-1">Partie introuvable</h1>
-      <p class="match-page__muted">Cette partie n'existe pas ou ce joueur n'y a pas participé.</p>
-    </template>
+    <NotFoundState v-if="notFound" title="Partie introuvable">
+      <template v-if="player">Cette partie n'existe pas, ou {{ formatRiotId(player.riotId) }} n'y a pas participé.</template>
+      <template v-else>Cette adresse ne correspond à aucune partie.</template>
+
+      <template #actions>
+        <RouterLink v-if="player" :to="profileLink" class="button button--primary">Voir le profil de {{ formatRiotId(player.riotId) }}</RouterLink>
+        <RouterLink to="/" class="button">Retour à l'accueil</RouterLink>
+      </template>
+    </NotFoundState>
 
     <template v-else-if="match.data && player">
       <MatchHeader :match="match.data" />

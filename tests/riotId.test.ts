@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { formatRiotId, isRegion, parseRiotIdSlug, toRiotIdSlug, parseRiotIdInput } from "@/utils/riotId";
+import { formatRiotId, isRegion, parseRiotIdSlug, toRiotIdSlug, riotIdSlugToInput, parseRiotIdInput } from "@/utils/riotId";
 
 describe("parseRiotIdSlug", () => {
   test("splits game name and tag line", () => {
@@ -26,6 +26,12 @@ describe("parseRiotIdSlug", () => {
 test("toRiotIdSlug and parseRiotIdSlug are inverse", () => {
   const riotId = { gameName: "Mid-or-Feed", tagLine: "1234" };
   expect(parseRiotIdSlug(toRiotIdSlug(riotId))).toEqual(riotId);
+});
+
+test("riotIdSlugToInput: last '-' becomes '#', even for an invalid tag", () => {
+  expect(riotIdSlugToInput("Kaori-EUWEST")).toBe("Kaori#EUWEST");
+  expect(riotIdSlugToInput("Jean-Pierre-EUW")).toBe("Jean-Pierre#EUW");
+  expect(riotIdSlugToInput("Kaori")).toBe("Kaori");
 });
 
 test("formatRiotId uses #", () => {

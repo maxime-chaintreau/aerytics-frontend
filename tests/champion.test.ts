@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { ChampionsByKey } from "@/types/staticData";
-import { championBySlug, championSearchIndex, normalizeChampionName, searchChampions } from "@/utils/champion";
+import { championBySlug, championSearchIndex, normalizeChampionName, searchChampions, closestChampions, editDistance } from "@/utils/champion";
 
 const champions = {
   103: { key: 103, id: "Ahri", name: "Ahri", title: "", tags: ["Mage", "Assassin"], image: "Ahri.png" },
@@ -35,5 +35,38 @@ describe("search", () => {
     expect(names("rek")).toEqual(["Rêk'Sai"]);
     expect(names("a")).toEqual(["Aatrox", "Ahri", "Ezreal", "Kai'Sa", "Rêk'Sai"]);
     expect(names("#")).toEqual([]);
+  });
+});
+
+describe("did you mean", () => {
+  const roster = {
+    222: { key: 222, id: "Jinx", name: "Jinx", title: "", tags: [], image: "Jinx.png" },
+    62: { key: 62, id: "MonkeyKing", name: "Wukong", title: "", tags: [], image: "MonkeyKing.png" },
+    103: { key: 103, id: "Ahri", name: "Ahri", title: "", tags: [], image: "Ahri.png" },
+    145: { key: 145, id: "Kaisa", name: "Kai'Sa", title: "", tags: [], image: "Kaisa.png" },
+  } as ChampionsByKey;
+  const index = championSearchIndex(roster);
+  const names = (query: string) => closestChampions(index, query).map((champion) => champion.name);
+
+  test("edit distance", () => {
+    expect(editDistance("jnx", "jinx")).toBe(1);
+    expect(editDistance("kaisa", "kaisa")).toBe(0);
+    expect(editDistance("", "ahri")).toBe(4);
+  });
+
+  test("search matches, display name and slug", () => {
+    expect(names("ahr")).toEqual(["Ahri"]);
+    expect(names("wukong")).toEqual(["Wukong"]);
+    expect(names("monkey")).toEqual(["Wukong"]);
+  });
+
+  test("typos", () => {
+    expect(names("jnx")).toEqual(["Jinx"]);
+    expect(names("kaiza")).toEqual(["Kai'Sa"]);
+  });
+
+  test("nothing close", () => {
+    expect(names("zzzzzz")).toEqual([]);
+    expect(names("")).toEqual([]);
   });
 });

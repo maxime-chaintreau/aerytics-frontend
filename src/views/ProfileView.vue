@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from "vue";
+import { useRoute } from "vue-router";
 import type { Role } from "@/types/riot";
 import { usePlayerFromRoute } from "@/composables/usePlayerFromRoute";
 import { useRoleFilter } from "@/composables/useRoleFilter";
+import { usePageTitle } from "@/composables/usePageTitle";
 import { useProfileSummary } from "@/composables/useProfileQueries";
 import { useProfileRefresh } from "@/composables/useProfileRefresh";
 import { useRecentSearches } from "@/composables/useRecentSearches";
 import { isNotFound } from "@/services/http";
-import { ROLE_OPTIONS, formatRole } from "@/utils/labels";
+import { ROLE_OPTIONS, formatRegion, formatRole } from "@/utils/labels";
+import { formatRiotId, riotIdSlugToInput } from "@/utils/riotId";
 import SegmentedControl from "@/components/ui/SegmentedControl.vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
+import NotFoundState from "@/components/ui/NotFoundState.vue";
 import RoleIcon from "@/components/game/icon/RoleIcon.vue";
+import SearchBar from "@/components/search/SearchBar.vue";
 import ProfileHeader from "@/features/profile/components/ProfileHeader.vue";
 import LpHistoryChart from "@/features/profile/components/LpHistoryChart.vue";
 import ChampionPoolTable from "@/features/profile/components/ChampionPoolTable.vue";
@@ -24,6 +29,11 @@ const role = useRoleFilter();
 const summary = reactive(useProfileSummary(player, role));
 
 const notFound = computed(() => player.value === null || isNotFound(summary.error));
+
+usePageTitle(() => (notFound.value ? "Joueur introuvable" : null));
+
+const route = useRoute();
+const requestedRiotId = computed(() => (player.value ? formatRiotId(player.value.riotId) : riotIdSlugToInput(String(route.params.riotId ?? ""))));
 
 const { add: addRecentSearch } = useRecentSearches();
 watch(
@@ -55,11 +65,20 @@ const { refreshAll, isRefreshing, hasError } = useProfileRefresh(player);
 </script>
 
 <template>
-  <template v-if="notFound">
-    <h1 tabindex="-1">Joueur introuvable</h1>
-    <p>Vérifie le Riot ID et la région.</p>
-    <p><RouterLink to="/">&lt;- Retour à l'accueil</RouterLink></p>
-  </template>
+  <NotFoundState v-if="notFound" title="Joueur introuvable">
+    <template v-if="player">
+      Aucun joueur <strong>{{ requestedRiotId }}</strong> en {{ formatRegion(player.region) }}. Vérifie l'orthographe, le #TAG et la région.
+    </template>
+    <template v-else>Cette adresse ne contient pas de Riot ID valide (Nom#TAG).</template>
+
+    <template #actions>
+      <RouterLink to="/" class="button">Retour à l'accueil</RouterLink>
+    </template>
+
+    <template #extra>
+      <SearchBar :key="route.fullPath" :initial-query="requestedRiotId" :initial-region="player?.region" />
+    </template>
+  </NotFoundState>
 
   <div v-else-if="player" class="profile">
     <ProfileHeader :player="player" :role="role" />

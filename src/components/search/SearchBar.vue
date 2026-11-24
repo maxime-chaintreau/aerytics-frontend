@@ -14,15 +14,15 @@ import { formatRegion } from "@/utils/labels";
 import PlayerIdentity from "@/components/game/PlayerIdentity.vue";
 import ChampionIcon from "@/components/game/icon/ChampionIcon.vue";
 
-withDefaults(defineProps<{ compact?: boolean }>(), { compact: false });
+const props = withDefaults(defineProps<{ compact?: boolean; initialQuery?: string; initialRegion?: Region }>(), { compact: false, initialQuery: "" });
 
 const router = useRouter();
 const { lastRegion, rememberRegion } = useRecentSearches();
 
-const region = ref<Region>(lastRegion.value);
+const region = ref<Region>(props.initialRegion ?? lastRegion.value);
 watch(region, rememberRegion);
 
-const query = ref("");
+const query = ref(props.initialQuery);
 const debouncedQuery = useDebounced(query, 200);
 const search = usePlayerSearch(debouncedQuery, region);
 
