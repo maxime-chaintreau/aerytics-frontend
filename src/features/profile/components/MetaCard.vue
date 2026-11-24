@@ -93,10 +93,18 @@ const tierText = computed(() => (minTier.value ? `${formatTier(minTier.value)}+`
 }
 
 .meta__row {
+  display: grid;
   grid-template-columns: 1.5ch minmax(0, 1fr) auto 3.5em;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding-block: var(--space-1);
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
 }
 
 .meta__champion {
+  gap: var(--space-2);
   min-width: 0;
 }
 
